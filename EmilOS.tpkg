@@ -180,7 +180,7 @@ local App = Application():set({\
 })\
 \
 App:importFromTML( \"EmilOS/UI/TML/EmilOS.tml\" )\
---App:addTheme( Theme.fromFile( \"EmilOS\", \"EmilOS/UI/Themes/EmilOS.theme\" ) )\
+App:addTheme( Theme.fromFile( \"EmilOS\", \"EmilOS/UI/Themes/EmilOS.theme\" ) )\
 \
 local function getNode( id )\
 \009return App:query(id).result[1]\

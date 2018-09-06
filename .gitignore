@@ -1,3 +1,5 @@
 .tpm/
 .tdt_projects.cfg
 startup
+Pickle.lua
+Minify.lua
