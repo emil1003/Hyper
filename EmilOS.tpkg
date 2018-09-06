@@ -141,13 +141,30 @@ local vfsAssets = {
 \009<backgroundColor>gray</backgroundColor>\
 </ClockView>\
 \
+<ContextMenu>\
+\009<color>white</color>\
+\009<backgroundColor>gray</backgroundColor>\
+</ContextMenu>\
+\
 <!-- Sidebar -->\
 <Container class=\"Sidebar\">\
 \009<color>black</color>\
 \009<backgroundColor>lightGray</backgroundColor>\
 </Container>\
 \
-<!-- TabbedPageContainer is handled in the Lua file -->",
+<!-- TabbedPageContainer is handled in the Lua file -->\
+\
+<!-- Dialogs -->\
+<Window class=\"Dialog\">\
+\009<color>black</color>\
+\009<backgroundColor>white</backgroundColor>\
+</Window>\
+\
+<Button class=\"DialogButton\">\
+\009<color>cyan</color>\
+\009<activeColor>white</activeColor>\
+\009<activeBackgroundColor>lightBlue</activeBackgroundColor>\
+</Button>",
   [ "EmilOS/Lua/EmilOS.lua" ] = "--[[\
 \009EmilOS, remade using Titanium.\
 \009(c) 2018 Emil Inc.\
@@ -163,7 +180,7 @@ local App = Application():set({\
 })\
 \
 App:importFromTML( \"EmilOS/UI/TML/EmilOS.tml\" )\
-App:addTheme( Theme.fromFile( \"EmilOS\", \"EmilOS/UI/Themes/EmilOS.theme\" ) )\
+--App:addTheme( Theme.fromFile( \"EmilOS\", \"EmilOS/UI/Themes/EmilOS.theme\" ) )\
 \
 local function getNode( id )\
 \009return App:query(id).result[1]\
@@ -171,7 +188,9 @@ end\
 \
 -- Get nodes and organize them\
 local Topbar = {\
-\009container = getNode \"#Topbar\",\
+\009self = getNode \"#Topbar\",\
+\
+\009menuButton = getNode \"#TopbarMenuButton\",\
 \
 \009clock = getNode \"#TopbarClock\",\
 \009searchButton = getNode \"#TopbarSearchButton\",\
@@ -179,26 +198,52 @@ local Topbar = {\
 }\
 \
 local Sidebar = {\
-\009container = getNode \"#Sidebar\",\
+\009self = getNode \"#Sidebar\",\
 \
 \009tabContainer = getNode \"#SidebarTabContainer\",\
 \
 \009Notifications = {\
-\009\009container = getNode \"#SidebarNotifications\"\
+\009\009self = getNode \"#SidebarNotifications\"\
 \009},\
 \
 \009isOpen = false\
 }\
 \
+local Dialog = {\
+\009self = getNode \"#Dialog\",\
+\
+\009label = getNode \"#DialogLabel\",\
+\
+\009rightButton = getNode \"#DialogButtonRight\",\
+\009leftButton = getNode \"#DialogButtonLeft\"\
+}\
+\
 -- Stupid fixes that shouldn't have to be done like this, but it's the only way.\
 function Sidebar:toggle() -- Can't be inside Sidebar because reasons\
 \009if Sidebar.isOpen then\
-\009\009Sidebar.container:animate( \"showSidebar\", \"X\", App.width + 1, 0.3, \"inCubic\" )\
+\009\009Sidebar.self:animate( \"showSidebar\", \"X\", App.width + 1, 0.3, \"inCubic\" )\
 \009else\
-\009\009Sidebar.container:animate( \"hideSidebar\", \"X\", App.width - Sidebar.container.width + 1, 0.3, \"outCubic\" )\
+\009\009Sidebar.self:animate( \"hideSidebar\", \"X\", App.width - Sidebar.self.width + 1, 0.3, \"outCubic\" )\
 \009end\
 \009Sidebar.isOpen = not Sidebar.isOpen\
 end\
+\
+function Dialog:create( label, buttonRight, buttonLeft, funcRight, funcLeft )\
+\009Dialog.label:setText( label )\
+\009Dialog.rightButton:setText( buttonRight )\
+\009Dialog.rightButton:on( \"trigger\", function()\
+\009\009Dialog.self:animate( \"dialog\", \"Y\", App.height + 1, 0.3, \"inCubic\" )\
+\009\009if funcRight then funcRight() end\
+\009end)\
+\009Dialog.leftButton:setText( buttonLeft and buttonLeft or \"\" )\
+\009Dialog.leftButton:on( \"trigger\", function()\
+\009\009Dialog.self:animate( \"dialog\", \"Y\", App.height + 1, 0.3, \"inCubic\" )\
+\009\009if funcLeft then funcLeft() end\
+\009end)\
+\
+\009Dialog.self:animate( \"dialog\", \"Y\", (App.height - Dialog.self.height) / 2, 0.3, \"outCubic\" )\
+end\
+\
 \
 Sidebar.tabContainer:set({ -- TabbedPageContainer doesn't apply colors from theme\
 \009tabColour = colors.black,\
@@ -208,6 +253,26 @@ Sidebar.tabContainer:set({ -- TabbedPageContainer doesn't apply colors from them
 })\
 \
 -- Setup event handlers\
+Topbar.menuButton:on( \"trigger\", function()\
+\009if Topbar.Menu then\
+\009\009App:removeNode( Topbar.Menu )\
+\009end\
+\009Topbar.Menu = App:addNode( ContextMenu({\
+\009\009{\"button\", \" Om EmilOS \", function() end},\
+\009\009{\"rule\"},\
+\009\009{\"button\", \" Indstillinger \", function() end},\
+\009\009{\"rule\"},\
+\009\009{\"menu\", \" Afslut...   \\16 \", {\
+\009\009\009{\"button\", \" Log af \", function()\
+\009\009\009\009App:removeNode( Topbar.Menu )\
+\009\009\009\009Dialog:create( \"Vil du logge af?\", \"Ja\", \"Nej\", function() App:stop() end )\
+\009\009\009end},\
+\009\009\009{\"button\", \" Genstart \", function() os.reboot() end},\
+\009\009\009{\"button\", \" Luk ned \", function() os.shutdown() end}\
+\009\009}}\
+\009}, 2, 2 ))\
+end)\
+\
 Sidebar.tabContainer:selectPage( \"SidebarNotifications\" )\
 Topbar.sidebarButton:on( \"trigger\", Sidebar.toggle )\
 \
@@ -221,7 +286,7 @@ App:start()",
 \009<!-- Topbar -->\
 \009<Container X=1 Y=1 width=\"$application.width\" height=1 id=\"Topbar\" class=\"Topbar\">\
 \
-\009\009<Button X=2 Y=1 width=\"$#self.text\" text=\" EmilOS \" id=\"Topbar.MenuButton\" class=\"Topbar MenuButton\" />\
+\009\009<Button X=2 Y=1 width=\"$#self.text\" text=\" EmilOS \" id=\"TopbarMenuButton\" class=\"Topbar MenuButton\" />\
 \
 \009\009<ClockView X=\"$(parent.width - self.width) / 2\" Y=1 width=\"$#self.text\" id=\"TopbarClock\" class=\"Topbar Clock\" />\
 \
@@ -246,6 +311,16 @@ App:start()",
 \009<!-- App List -->\
 \
 \
+\
+\009<!-- Dialogs -->\
+\009<Window X=\"$(application.width - self.width) / 2\" Y=\"$application.height + 1\" width=25 height=7 titleBar=\"false\" resizeable=\"false\" moveable=\"false\" id=\"Dialog\" class=\"Dialog\">\
+\009\009\
+\009\009<Label X=2 Y=2 text=\"\" id=\"DialogLabel\" />\
+\
+\009\009<Button X=\"$parent.width - self.width\" Y=\"$parent.height - 1\" width=\"$#self.text\" text=\" \" id=\"DialogButtonRight\" class=\"DialogButton\"/>\
+\009\009<Button X=\"${#DialogButtonRight}.X - self.width - 1\" Y=\"$parent.height - 1\" width=\"$#self.text\" text=\" \" id=\"DialogButtonLeft\" class=\"DialogButton\"/>\
+\
+\009</Window>\
 \
 </Container>",
 }local env = type( getfenv ) == "function" and getfenv() or _ENV or _G

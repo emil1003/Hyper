@@ -24,6 +24,11 @@
 	<backgroundColor>gray</backgroundColor>
 </ClockView>
 
+<ContextMenu>
+	<color>white</color>
+	<backgroundColor>gray</backgroundColor>
+</ContextMenu>
+
 <!-- Sidebar -->
 <Container class="Sidebar">
 	<color>black</color>
@@ -31,3 +36,15 @@
 </Container>
 
 <!-- TabbedPageContainer is handled in the Lua file -->
+
+<!-- Dialogs -->
+<Window class="Dialog">
+	<color>black</color>
+	<backgroundColor>white</backgroundColor>
+</Window>
+
+<Button class="DialogButton">
+	<color>cyan</color>
+	<activeColor>white</activeColor>
+	<activeBackgroundColor>lightBlue</activeBackgroundColor>
+</Button>

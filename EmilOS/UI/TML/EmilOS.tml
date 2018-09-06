@@ -3,7 +3,7 @@
 	<!-- Topbar -->
 	<Container X=1 Y=1 width="$application.width" height=1 id="Topbar" class="Topbar">
 
-		<Button X=2 Y=1 width="$#self.text" text=" EmilOS " id="Topbar.MenuButton" class="Topbar MenuButton" />
+		<Button X=2 Y=1 width="$#self.text" text=" EmilOS " id="TopbarMenuButton" class="Topbar MenuButton" />
 
 		<ClockView X="$(parent.width - self.width) / 2" Y=1 width="$#self.text" id="TopbarClock" class="Topbar Clock" />
 
@@ -28,5 +28,15 @@
 	<!-- App List -->
 
 
+
+	<!-- Dialogs -->
+	<Window X="$(application.width - self.width) / 2" Y="$application.height + 1" width=25 height=7 titleBar="false" resizeable="false" moveable="false" id="Dialog" class="Dialog">
+		
+		<Label X=2 Y=2 text="" id="DialogLabel" />
+
+		<Button X="$parent.width - self.width" Y="$parent.height - 1" width="$#self.text" text=" " id="DialogButtonRight" class="DialogButton"/>
+		<Button X="${#DialogButtonRight}.X - self.width - 1" Y="$parent.height - 1" width="$#self.text" text=" " id="DialogButtonLeft" class="DialogButton"/>
+
+	</Window>
 
 </Container>
