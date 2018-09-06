@@ -231,7 +231,7 @@ App:start()",
 \009</Container>\
 \
 \009<!-- Right Sidebar -->\
-\009<Container X=\"$application.width + 1\" Y=\"${#Topbar}.Y + 1\" width=16 height=\"$application.height - 1\" id=\"Sidebar\" class=\"Sidebar\">\
+\009<Container X=\"$application.width + 1\" Y=\"${#Topbar}.Y + 1\" width=20 height=\"$application.height - 1\" id=\"Sidebar\" class=\"Sidebar\">\
 \009\009<TabbedPageContainer X=1 Y=1 width=\"$parent.width\" height=\"$parent.height\" id=\"SidebarTabContainer\" class=\"Sidebar TabContainer\">\
 \
 \009\009\009<Page id=\"SidebarNotifications\" name=\"=\" xScrollAllowed=\"false\">\

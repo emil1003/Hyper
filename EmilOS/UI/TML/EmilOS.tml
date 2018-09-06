@@ -13,7 +13,7 @@
 	</Container>
 
 	<!-- Right Sidebar -->
-	<Container X="$application.width + 1" Y="${#Topbar}.Y + 1" width=16 height="$application.height - 1" id="Sidebar" class="Sidebar">
+	<Container X="$application.width + 1" Y="${#Topbar}.Y + 1" width=20 height="$application.height - 1" id="Sidebar" class="Sidebar">
 		<TabbedPageContainer X=1 Y=1 width="$parent.width" height="$parent.height" id="SidebarTabContainer" class="Sidebar TabContainer">
 
 			<Page id="SidebarNotifications" name="=" xScrollAllowed="false">
