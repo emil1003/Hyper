@@ -1,0 +1,52 @@
+--[[
+	A simple class that makes displaying a clock easy.
+	NOTE: Add :update() to Application:schedule(), preferably with a .5 sec delay and repeating.
+]]
+class ClockView extends Node {
+	clockType = 1;
+
+	color = colors.lightGray;
+	backgroundColor = colors.gray;
+}
+
+--[[
+	@constructor
+	@desc Init instance and watch the property 'text'
+	@param <table - structure>*
+]]
+function ClockView:__init__( ... )
+	self:resolve( ... )
+	self:super()
+
+	self:register( "color", "backgroundColor" )
+
+    self:update()
+end
+
+--[[
+	@instance
+	@desc Updates the clock text (clockType 1 = 24 hr clock)
+]]
+function ClockView:update()
+	local newTime = textutils.formatTime( os.time(), self.clockType == 1 and true or false )
+	if self.text ~= newTime then
+		self.text = newTime
+		self.width = #newTime
+		self.changed = true
+	end
+end
+
+--[[
+	@instance
+	@desc Draws the node
+	@param <boolean - force>*
+]]
+function ClockView:draw( force )
+	if self.changed or force then
+		self.canvas:drawTextLine( 1, 1, self.text, self.color, self.backgroundColor )
+	end
+end
+
+configureConstructor {
+	argumentTypes = { clockType = "number", color = "colour", backgroundColor = "colour" }
+}

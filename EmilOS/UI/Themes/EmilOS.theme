@@ -1,0 +1,33 @@
+<!-- EmilOS Theme -->
+
+<!-- Application -->
+<Container class="Application">
+	<color>black</color>
+	<backgroundColor>black</backgroundColor>
+</Container>
+
+<!-- Topbar -->
+<Container class="Topbar">
+	<color>lightGray</color>
+	<backgroundColor>gray</backgroundColor>
+</Container>
+
+<Button class="Topbar">
+	<color>lightGray</color>
+	<backgroundColor>gray</backgroundColor>
+	<activeColor>white</activeColor>
+	<activeBackgroundColor>lightBlue</activeBackgroundColor>
+</Button>
+
+<ClockView class="Topbar Clock">
+	<color>lightGray</color>
+	<backgroundColor>gray</backgroundColor>
+</ClockView>
+
+<!-- Sidebar -->
+<Container class="Sidebar">
+	<color>black</color>
+	<backgroundColor>lightGray</backgroundColor>
+</Container>
+
+<!-- TabbedPageContainer is handled in the Lua file -->
