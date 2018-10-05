@@ -261,7 +261,7 @@ Topbar.menuButton:on( \"trigger\", function()\
 \009Topbar.Menu = App:addNode( ContextMenu({\
 \009\009{\"button\", \" Om EmilOS \", function()\
 \009\009\009App:removeNode( Topbar.Menu )\
-\009\009\009Dialog.create( nil, \"EmilOS Titanium 0.0.1\", \"OK\" )\
+\009\009\009Dialog.create( nil --[[ why? ]], \"EmilOS Titanium 0.0.1\", \"OK\" )\
 \009\009end},\
 \009\009{\"rule\"},\
 \009\009{\"button\", \" Indstillinger \", function() end},\
