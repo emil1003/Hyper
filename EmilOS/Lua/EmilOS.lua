@@ -36,7 +36,8 @@ local Sidebar = {
 	tabContainer = getNode "#SidebarTabContainer",
 
 	Notifications = {
-		self = getNode "#SidebarNotifications"
+		self = getNode "#SidebarNotifications",
+		list = getNode "#SidebarNotificationsList"
 	},
 
 	isOpen = false
@@ -63,7 +64,7 @@ end
 
 function Dialog:create( label, buttonRight, buttonLeft, funcRight, funcLeft )
 	Dialog.label:setText( label )
-	Dialog.rightButton:setText( buttonRight )
+	Dialog.rightButton:setText( buttonRight and buttonRight or "" )
 	Dialog.rightButton:on( "trigger", function()
 		Dialog.self:animate( "dialog", "Y", App.height + 1, 0.3, "inCubic" )
 		if funcRight then funcRight() end
@@ -91,7 +92,10 @@ Topbar.menuButton:on( "trigger", function()
 		App:removeNode( Topbar.Menu )
 	end
 	Topbar.Menu = App:addNode( ContextMenu({
-		{"button", " Om EmilOS ", function() end},
+		{"button", " Om EmilOS ", function()
+			App:removeNode( Topbar.Menu )
+			Dialog.create( nil --[[ why? ]], "EmilOS Titanium 0.0.1", "OK" )
+		end},
 		{"rule"},
 		{"button", " Indstillinger ", function() end},
 		{"rule"},
@@ -109,6 +113,7 @@ end)
 Sidebar.tabContainer:selectPage( "SidebarNotifications" )
 Topbar.sidebarButton:on( "trigger", Sidebar.toggle )
 
+App:schedule( function() Sidebar.Notifications.list:addNode( Label( "Hej med dig", 2 ) ) end, 10 )
 
 
 -- Start Titanium event loop

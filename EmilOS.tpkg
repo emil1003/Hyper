@@ -203,7 +203,8 @@ local Sidebar = {\
 \009tabContainer = getNode \"#SidebarTabContainer\",\
 \
 \009Notifications = {\
-\009\009self = getNode \"#SidebarNotifications\"\
+\009\009self = getNode \"#SidebarNotifications\",\
+\009\009list = getNode \"#SidebarNotificationsList\"\
 \009},\
 \
 \009isOpen = false\
@@ -230,7 +231,7 @@ end\
 \
 function Dialog:create( label, buttonRight, buttonLeft, funcRight, funcLeft )\
 \009Dialog.label:setText( label )\
-\009Dialog.rightButton:setText( buttonRight )\
+\009Dialog.rightButton:setText( buttonRight and buttonRight or \"\" )\
 \009Dialog.rightButton:on( \"trigger\", function()\
 \009\009Dialog.self:animate( \"dialog\", \"Y\", App.height + 1, 0.3, \"inCubic\" )\
 \009\009if funcRight then funcRight() end\
@@ -258,7 +259,10 @@ Topbar.menuButton:on( \"trigger\", function()\
 \009\009App:removeNode( Topbar.Menu )\
 \009end\
 \009Topbar.Menu = App:addNode( ContextMenu({\
-\009\009{\"button\", \" Om EmilOS \", function() end},\
+\009\009{\"button\", \" Om EmilOS \", function()\
+\009\009\009App:removeNode( Topbar.Menu )\
+\009\009\009Dialog.create( nil, \"EmilOS Titanium 0.0.1\", \"OK\" )\
+\009\009end},\
 \009\009{\"rule\"},\
 \009\009{\"button\", \" Indstillinger \", function() end},\
 \009\009{\"rule\"},\
@@ -276,6 +280,7 @@ end)\
 Sidebar.tabContainer:selectPage( \"SidebarNotifications\" )\
 Topbar.sidebarButton:on( \"trigger\", Sidebar.toggle )\
 \
+App:schedule( function() Sidebar.Notifications.list:addNode( Label( \"Hej med dig\", 2 ) ) end, 10 )\
 \
 \
 -- Start Titanium event loop\
@@ -300,6 +305,7 @@ App:start()",
 \009\009<TabbedPageContainer X=1 Y=1 width=\"$parent.width\" height=\"$parent.height\" id=\"SidebarTabContainer\" class=\"Sidebar TabContainer\">\
 \
 \009\009\009<Page id=\"SidebarNotifications\" name=\"=\" xScrollAllowed=\"false\">\
+\009\009\009\009<ListView X=1 Y=2 width=\"$parent.width\" height=\"$parent.height - 1\" xScrollAllowed=\"false\" id=\"SidebarNotificationsList\" />\
 \009\009\009</Page>\
 \
 \009\009\009<Page id=\"SidebarDevices\" name=\"/\" xScrollAllowed=\"false\">\
@@ -313,7 +319,7 @@ App:start()",
 \
 \
 \009<!-- Dialogs -->\
-\009<Window X=\"$(application.width - self.width) / 2\" Y=\"$application.height + 1\" width=25 height=7 titleBar=\"false\" resizeable=\"false\" moveable=\"false\" id=\"Dialog\" class=\"Dialog\">\
+\009<Window X=\"$(application.width - self.width) / 2\" Y=\"$application.height + 1\" width=25 height=7 titleBar=\"false\" resizeable=\"false\" moveable=\"false\" Z=9999 id=\"Dialog\" class=\"Dialog\">\
 \009\009\
 \009\009<Label X=2 Y=2 text=\"\" id=\"DialogLabel\" />\
 \
