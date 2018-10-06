@@ -3,7 +3,7 @@
 	<!-- Topbar -->
 	<Container X=1 Y=1 width="$application.width" height=1 id="Topbar" class="Topbar">
 
-		<Button X=2 Y=1 width="$#self.text" text=" EmilOS " id="TopbarMenuButton" class="Topbar MenuButton" />
+		<Button X=2 Y=1 width="$#self.text" text=" Hyper " id="TopbarMenuButton" class="Topbar MenuButton" />
 
 		<ClockView X="$(parent.width - self.width) / 2" Y=1 width="$#self.text" id="TopbarClock" class="Topbar Clock" />
 

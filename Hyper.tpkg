@@ -115,58 +115,9 @@ configureConstructor {\
 }",
 }
 local vfsAssets = {
-  [ "EmilOS/UI/Themes/EmilOS.theme" ] = "<!-- EmilOS Theme -->\
-\
-<!-- Application -->\
-<Container class=\"Application\">\
-\009<color>black</color>\
-\009<backgroundColor>black</backgroundColor>\
-</Container>\
-\
-<!-- Topbar -->\
-<Container class=\"Topbar\">\
-\009<color>lightGray</color>\
-\009<backgroundColor>gray</backgroundColor>\
-</Container>\
-\
-<Button class=\"Topbar\">\
-\009<color>lightGray</color>\
-\009<backgroundColor>gray</backgroundColor>\
-\009<activeColor>white</activeColor>\
-\009<activeBackgroundColor>lightBlue</activeBackgroundColor>\
-</Button>\
-\
-<ClockView class=\"Topbar Clock\">\
-\009<color>lightGray</color>\
-\009<backgroundColor>gray</backgroundColor>\
-</ClockView>\
-\
-<ContextMenu>\
-\009<color>white</color>\
-\009<backgroundColor>gray</backgroundColor>\
-</ContextMenu>\
-\
-<!-- Sidebar -->\
-<Container class=\"Sidebar\">\
-\009<color>black</color>\
-\009<backgroundColor>lightGray</backgroundColor>\
-</Container>\
-\
-<!-- TabbedPageContainer is handled in the Lua file -->\
-\
-<!-- Dialogs -->\
-<Window class=\"Dialog\">\
-\009<color>black</color>\
-\009<backgroundColor>white</backgroundColor>\
-</Window>\
-\
-<Button class=\"DialogButton\">\
-\009<color>cyan</color>\
-\009<activeColor>white</activeColor>\
-\009<activeBackgroundColor>lightBlue</activeBackgroundColor>\
-</Button>",
-  [ "EmilOS/Lua/EmilOS.lua" ] = "--[[\
-\009EmilOS, remade using Titanium.\
+  [ "Hyper/Lua/Hyper.lua" ] = "--[[\
+\009Hyper, the easy-to-use ComputerCraft OS.\
+\009Evolution of the original EmilOS.\
 \009(c) 2018 Emil Inc.\
 \
 \009Titanium is (c) 2016 Harry Felton.\
@@ -179,8 +130,8 @@ local App = Application():set({\
 \009backgroundColor = colors.white\
 })\
 \
-App:importFromTML( \"EmilOS/UI/TML/EmilOS.tml\" )\
-App:addTheme( Theme.fromFile( \"EmilOS\", \"EmilOS/UI/Themes/EmilOS.theme\" ) )\
+App:importFromTML( \"Hyper/UI/TML/Hyper.tml\" )\
+App:addTheme( Theme.fromFile( \"Hyper\", \"Hyper/UI/Themes/Hyper.theme\" ) )\
 \
 local function getNode( id )\
 \009return App:query(id).result[1]\
@@ -245,7 +196,6 @@ function Dialog:create( label, buttonRight, buttonLeft, funcRight, funcLeft )\
 \009Dialog.self:animate( \"dialog\", \"Y\", (App.height - Dialog.self.height) / 2, 0.3, \"outCubic\" )\
 end\
 \
-\
 Sidebar.tabContainer:set({ -- TabbedPageContainer doesn't apply colors from theme\
 \009tabColour = colors.black,\
 \009tabBackgroundColour = colors.lightGray,\
@@ -259,20 +209,20 @@ Topbar.menuButton:on( \"trigger\", function()\
 \009\009App:removeNode( Topbar.Menu )\
 \009end\
 \009Topbar.Menu = App:addNode( ContextMenu({\
-\009\009{\"button\", \" Om EmilOS \", function()\
+\009\009{\"button\", \" About Hyper \", function()\
 \009\009\009App:removeNode( Topbar.Menu )\
-\009\009\009Dialog.create( nil --[[ why? ]], \"EmilOS Titanium 0.0.1\", \"OK\" )\
+\009\009\009Dialog.create( nil --[[ why? ]], \"Hyper\\n\".._HOST, \"OK\" )\
 \009\009end},\
 \009\009{\"rule\"},\
-\009\009{\"button\", \" Indstillinger \", function() end},\
+\009\009{\"button\", \" Settings \", function() end},\
 \009\009{\"rule\"},\
-\009\009{\"menu\", \" Afslut...   \\16 \", {\
-\009\009\009{\"button\", \" Log af \", function()\
+\009\009{\"menu\", \" Leave...   \\16 \", {\
+\009\009\009{\"button\", \" Logout \", function()\
 \009\009\009\009App:removeNode( Topbar.Menu )\
-\009\009\009\009Dialog:create( \"Vil du logge af?\", \"Ja\", \"Nej\", function() App:stop() end )\
+\009\009\009\009Dialog:create( \"Log out?\", \"Yes\", \"No\", function() App:stop() end )\
 \009\009\009end},\
-\009\009\009{\"button\", \" Genstart \", function() os.reboot() end},\
-\009\009\009{\"button\", \" Luk ned \", function() os.shutdown() end}\
+\009\009\009{\"button\", \" Reboot \", function() os.reboot() end},\
+\009\009\009{\"button\", \" Shutdown \", function() os.shutdown() end}\
 \009\009}}\
 \009}, 2, 2 ))\
 end)\
@@ -280,18 +230,65 @@ end)\
 Sidebar.tabContainer:selectPage( \"SidebarNotifications\" )\
 Topbar.sidebarButton:on( \"trigger\", Sidebar.toggle )\
 \
-App:schedule( function() Sidebar.Notifications.list:addNode( Label( \"Hej med dig\", 2 ) ) end, 10 )\
-\
-\
 -- Start Titanium event loop\
 App:schedule( function() Topbar.clock:update() end, 0.5, true )\
 App:start()",
-  [ "EmilOS/UI/TML/EmilOS.tml" ] = "<Container X=1 Y=1 width=\"$application.width\" height=\"$application.height\" id=\"Application\" class=\"Application\">\
+  [ "Hyper/UI/Themes/Hyper.theme" ] = "<!-- Hyper Theme -->\
+\
+<!-- Application -->\
+<Container class=\"Application\">\
+\009<color>black</color>\
+\009<backgroundColor>black</backgroundColor>\
+</Container>\
+\
+<!-- Topbar -->\
+<Container class=\"Topbar\">\
+\009<color>lightGray</color>\
+\009<backgroundColor>gray</backgroundColor>\
+</Container>\
+\
+<Button class=\"Topbar\">\
+\009<color>lightGray</color>\
+\009<backgroundColor>gray</backgroundColor>\
+\009<activeColor>white</activeColor>\
+\009<activeBackgroundColor>lightBlue</activeBackgroundColor>\
+</Button>\
+\
+<ClockView class=\"Topbar Clock\">\
+\009<color>lightGray</color>\
+\009<backgroundColor>gray</backgroundColor>\
+</ClockView>\
+\
+<ContextMenu>\
+\009<color>white</color>\
+\009<backgroundColor>gray</backgroundColor>\
+</ContextMenu>\
+\
+<!-- Sidebar -->\
+<Container class=\"Sidebar\">\
+\009<color>black</color>\
+\009<backgroundColor>lightGray</backgroundColor>\
+</Container>\
+\
+<!-- TabbedPageContainer is handled in the Lua file -->\
+\
+<!-- Dialogs -->\
+<Window class=\"Dialog\">\
+\009<color>black</color>\
+\009<backgroundColor>white</backgroundColor>\
+</Window>\
+\
+<Button class=\"DialogButton\">\
+\009<color>cyan</color>\
+\009<activeColor>white</activeColor>\
+\009<activeBackgroundColor>lightBlue</activeBackgroundColor>\
+</Button>",
+  [ "Hyper/UI/TML/Hyper.tml" ] = "<Container X=1 Y=1 width=\"$application.width\" height=\"$application.height\" id=\"Application\" class=\"Application\">\
 \
 \009<!-- Topbar -->\
 \009<Container X=1 Y=1 width=\"$application.width\" height=1 id=\"Topbar\" class=\"Topbar\">\
 \
-\009\009<Button X=2 Y=1 width=\"$#self.text\" text=\" EmilOS \" id=\"TopbarMenuButton\" class=\"Topbar MenuButton\" />\
+\009\009<Button X=2 Y=1 width=\"$#self.text\" text=\" Hyper \" id=\"TopbarMenuButton\" class=\"Topbar MenuButton\" />\
 \
 \009\009<ClockView X=\"$(parent.width - self.width) / 2\" Y=1 width=\"$#self.text\" id=\"TopbarClock\" class=\"Topbar Clock\" />\
 \
@@ -347,11 +344,11 @@ VFS_ENV._G = VFS_ENV
 VFS_ENV._ENV = VFS_ENV
 
 local VFS_DIRS = {
-  [ "EmilOS/UI/Themes" ] = true,
-  EmilOS = true,
-  [ "EmilOS/UI" ] = true,
-  [ "EmilOS/Lua" ] = true,
-  [ "EmilOS/UI/TML" ] = true,
+  [ "Hyper/UI" ] = true,
+  [ "Hyper/Lua" ] = true,
+  Hyper = true,
+  [ "Hyper/UI/TML" ] = true,
+  [ "Hyper/UI/Themes" ] = true,
 }
 local matches = { ["^"] = "%^", ["$"] = "%$", ["("] = "%(", [")"] = "%)", ["%"] = "%%", ["*"] = "[^/]*", ["."] = "%.", ["["] = "%[", ["]"] = "%]", ["+"] = "%+", ["-"] = "%-" }
 
@@ -610,4 +607,4 @@ end)
 for name, source in pairs( classSource ) do
     loadClass( name, source )
 end
-local fn, err = VFS_ENV.loadfile 'EmilOS/Lua/EmilOS.lua'if fn then fn( unpack( args ) ) else return error('Failed to run file from bundle: "'..tostring( err )..'"') end
+local fn, err = VFS_ENV.loadfile 'Hyper/Lua/Hyper.lua'if fn then fn( unpack( args ) ) else return error('Failed to run file from bundle: "'..tostring( err )..'"') end

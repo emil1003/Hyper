@@ -1,5 +1,6 @@
 --[[
-	EmilOS, remade using Titanium.
+	Hyper, the easy-to-use ComputerCraft OS.
+	Evolution of the original EmilOS.
 	(c) 2018 Emil Inc.
 
 	Titanium is (c) 2016 Harry Felton.
@@ -12,8 +13,8 @@ local App = Application():set({
 	backgroundColor = colors.white
 })
 
-App:importFromTML( "EmilOS/UI/TML/EmilOS.tml" )
-App:addTheme( Theme.fromFile( "EmilOS", "EmilOS/UI/Themes/EmilOS.theme" ) )
+App:importFromTML( "Hyper/UI/TML/Hyper.tml" )
+App:addTheme( Theme.fromFile( "Hyper", "Hyper/UI/Themes/Hyper.theme" ) )
 
 local function getNode( id )
 	return App:query(id).result[1]
@@ -78,7 +79,6 @@ function Dialog:create( label, buttonRight, buttonLeft, funcRight, funcLeft )
 	Dialog.self:animate( "dialog", "Y", (App.height - Dialog.self.height) / 2, 0.3, "outCubic" )
 end
 
-
 Sidebar.tabContainer:set({ -- TabbedPageContainer doesn't apply colors from theme
 	tabColour = colors.black,
 	tabBackgroundColour = colors.lightGray,
@@ -92,29 +92,26 @@ Topbar.menuButton:on( "trigger", function()
 		App:removeNode( Topbar.Menu )
 	end
 	Topbar.Menu = App:addNode( ContextMenu({
-		{"button", " Om EmilOS ", function()
+		{"button", " About Hyper ", function()
 			App:removeNode( Topbar.Menu )
-			Dialog.create( nil --[[ why? ]], "EmilOS Titanium 0.0.1", "OK" )
+			Dialog.create( nil --[[ why? ]], "Hyper\n".._HOST, "OK" )
 		end},
 		{"rule"},
-		{"button", " Indstillinger ", function() end},
+		{"button", " Settings ", function() end},
 		{"rule"},
-		{"menu", " Afslut...   \16 ", {
-			{"button", " Log af ", function()
+		{"menu", " Leave...   \16 ", {
+			{"button", " Logout ", function()
 				App:removeNode( Topbar.Menu )
-				Dialog:create( "Vil du logge af?", "Ja", "Nej", function() App:stop() end )
+				Dialog:create( "Log out?", "Yes", "No", function() App:stop() end )
 			end},
-			{"button", " Genstart ", function() os.reboot() end},
-			{"button", " Luk ned ", function() os.shutdown() end}
+			{"button", " Reboot ", function() os.reboot() end},
+			{"button", " Shutdown ", function() os.shutdown() end}
 		}}
 	}, 2, 2 ))
 end)
 
 Sidebar.tabContainer:selectPage( "SidebarNotifications" )
 Topbar.sidebarButton:on( "trigger", Sidebar.toggle )
-
-App:schedule( function() Sidebar.Notifications.list:addNode( Label( "Hej med dig", 2 ) ) end, 10 )
-
 
 -- Start Titanium event loop
 App:schedule( function() Topbar.clock:update() end, 0.5, true )
