@@ -1,4 +1,13 @@
 <Container X=1 Y=1 width="$application.width" height="$application.height" id="Application" class="Application">
+	<!-- Dialogs -->
+	<Window X="$(application.width - self.width) / 2" Y="$application.height + 1" width=25 height=7 titleBar="false" resizeable="false" moveable="false" Z=9999 id="Dialog" class="Dialog">
+		
+		<Label X=2 Y=2 text="" id="DialogLabel" />
+
+		<Button X="$parent.width - self.width" Y="$parent.height - 1" width="$#self.text" text=" " id="DialogButtonRight" class="DialogButton"/>
+		<Button X="${#DialogButtonRight}.X - self.width - 1" Y="$parent.height - 1" width="$#self.text" text=" " id="DialogButtonLeft" class="DialogButton"/>
+
+	</Window>
 
 	<!-- Topbar -->
 	<Container X=1 Y=1 width="$application.width" height=1 id="Topbar" class="Topbar">
@@ -11,6 +20,9 @@
 		<Button X="$parent.width - self.width + 1" Y=1 width="$#self.text" text=" = " id="TopbarSidebarButton" class="Topbar SidebarButton" />
 
 	</Container>
+
+	<!-- App List -->
+	<Container X=1 Y="${#Topbar}.Y + 1" width="$application.width" height="$application.height - 1" id="AppListContainer" class="AppListContainer" />
 
 	<!-- Right Sidebar -->
 	<Container X="$application.width + 1" Y="${#Topbar}.Y + 1" width=20 height="$application.height - 1" id="Sidebar" class="Sidebar">
@@ -25,19 +37,4 @@
 
 		</TabbedPageContainer>
 	</Container>
-
-	<!-- App List -->
-
-
-
-	<!-- Dialogs -->
-	<Window X="$(application.width - self.width) / 2" Y="$application.height + 1" width=25 height=7 titleBar="false" resizeable="false" moveable="false" Z=9999 id="Dialog" class="Dialog">
-		
-		<Label X=2 Y=2 text="" id="DialogLabel" />
-
-		<Button X="$parent.width - self.width" Y="$parent.height - 1" width="$#self.text" text=" " id="DialogButtonRight" class="DialogButton"/>
-		<Button X="${#DialogButtonRight}.X - self.width - 1" Y="$parent.height - 1" width="$#self.text" text=" " id="DialogButtonLeft" class="DialogButton"/>
-
-	</Window>
-
 </Container>

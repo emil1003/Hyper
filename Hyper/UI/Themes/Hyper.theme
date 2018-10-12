@@ -29,6 +29,12 @@
 	<backgroundColor>gray</backgroundColor>
 </ContextMenu>
 
+<!-- App List -->
+<Container class="AppListContainer">
+	<color>white</color>
+	<backgroundColor>cyan</backgroundColor>
+</Container>
+
 <!-- Sidebar -->
 <Container class="Sidebar">
 	<color>black</color>

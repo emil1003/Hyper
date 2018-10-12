@@ -145,7 +145,15 @@ local Topbar = {\
 \
 \009clock = getNode \"#TopbarClock\",\
 \009searchButton = getNode \"#TopbarSearchButton\",\
-\009sidebarButton = getNode \"#TopbarSidebarButton\"\
+\009sidebarButton = getNode \"#TopbarSidebarButton\",\
+\
+\009dragStartedOn = false\
+}\
+\
+local AppList = {\
+\009--self = getNode \"#AppList\", Not yet implemented\
+\
+\009container = getNode \"#AppListContainer\"\
 }\
 \
 local Sidebar = {\
@@ -182,12 +190,13 @@ end\
 \
 function Dialog:create( label, buttonRight, buttonLeft, funcRight, funcLeft )\
 \009Dialog.label:setText( label )\
-\009Dialog.rightButton:setText( buttonRight and buttonRight or \"\" )\
-\009Dialog.rightButton:on( \"trigger\", function()\
+\009Dialog.rightButton:off( \"trigger\" ):on( \"trigger\", function()\
 \009\009Dialog.self:animate( \"dialog\", \"Y\", App.height + 1, 0.3, \"inCubic\" )\
 \009\009if funcRight then funcRight() end\
 \009end)\
+\009Dialog.rightButton:setText( buttonRight and buttonRight or \"\" )\
 \009Dialog.leftButton:setText( buttonLeft and buttonLeft or \"\" )\
+\009Dialog.leftButton:off( \"trigger\" )\
 \009Dialog.leftButton:on( \"trigger\", function()\
 \009\009Dialog.self:animate( \"dialog\", \"Y\", App.height + 1, 0.3, \"inCubic\" )\
 \009\009if funcLeft then funcLeft() end\
@@ -224,11 +233,34 @@ Topbar.menuButton:on( \"trigger\", function()\
 \009\009\009{\"button\", \" Reboot \", function() os.reboot() end},\
 \009\009\009{\"button\", \" Shutdown \", function() os.shutdown() end}\
 \009\009}}\
-\009}, 2, 2 ))\
+\009}, 2, Topbar.self.Y + 1 ))\
 end)\
 \
-Sidebar.tabContainer:selectPage( \"SidebarNotifications\" )\
 Topbar.sidebarButton:on( \"trigger\", Sidebar.toggle )\
+Topbar.searchButton:on( \"trigger\", function() Topbar.self:animate( \"topbar\", \"Y\", 10, 0.3, \"outCubic\" ) end)\
+\
+Sidebar.tabContainer:selectPage( \"SidebarNotifications\" )\
+\
+-- Set some global event listeners\
+App:on( \"mouse_click\", function( _, event )\
+\009if event.button == 1 then\
+\009\009if event.Y == Topbar.self.Y then Topbar.dragStartedOn = true end\
+\009\009if event.X < Sidebar.self.X and Sidebar.isOpen and not Topbar.dragStartedOn then Sidebar:toggle() end\
+\009end\
+end)\
+\
+App:on( \"mouse_drag\", function( _, event )\
+\009if event.button == 1 then\
+\009\009if Topbar.dragStartedOn then\
+\009\009\009Topbar.self.Y = event.Y\
+\009\009\009event.handled = true\
+\009\009end\
+\009end\
+end)\
+\
+App:on( \"mouse_up\", function( _, event )\
+\009Topbar.dragStartedOn = false\
+end)\
 \
 -- Start Titanium event loop\
 App:schedule( function() Topbar.clock:update() end, 0.5, true )\
@@ -264,6 +296,12 @@ App:start()",
 \009<backgroundColor>gray</backgroundColor>\
 </ContextMenu>\
 \
+<!-- App List -->\
+<Container class=\"AppListContainer\">\
+\009<color>white</color>\
+\009<backgroundColor>cyan</backgroundColor>\
+</Container>\
+\
 <!-- Sidebar -->\
 <Container class=\"Sidebar\">\
 \009<color>black</color>\
@@ -284,6 +322,15 @@ App:start()",
 \009<activeBackgroundColor>lightBlue</activeBackgroundColor>\
 </Button>",
   [ "Hyper/UI/TML/Hyper.tml" ] = "<Container X=1 Y=1 width=\"$application.width\" height=\"$application.height\" id=\"Application\" class=\"Application\">\
+\009<!-- Dialogs -->\
+\009<Window X=\"$(application.width - self.width) / 2\" Y=\"$application.height + 1\" width=25 height=7 titleBar=\"false\" resizeable=\"false\" moveable=\"false\" Z=9999 id=\"Dialog\" class=\"Dialog\">\
+\009\009\
+\009\009<Label X=2 Y=2 text=\"\" id=\"DialogLabel\" />\
+\
+\009\009<Button X=\"$parent.width - self.width\" Y=\"$parent.height - 1\" width=\"$#self.text\" text=\" \" id=\"DialogButtonRight\" class=\"DialogButton\"/>\
+\009\009<Button X=\"${#DialogButtonRight}.X - self.width - 1\" Y=\"$parent.height - 1\" width=\"$#self.text\" text=\" \" id=\"DialogButtonLeft\" class=\"DialogButton\"/>\
+\
+\009</Window>\
 \
 \009<!-- Topbar -->\
 \009<Container X=1 Y=1 width=\"$application.width\" height=1 id=\"Topbar\" class=\"Topbar\">\
@@ -296,6 +343,9 @@ App:start()",
 \009\009<Button X=\"$parent.width - self.width + 1\" Y=1 width=\"$#self.text\" text=\" = \" id=\"TopbarSidebarButton\" class=\"Topbar SidebarButton\" />\
 \
 \009</Container>\
+\
+\009<!-- App List -->\
+\009<Container X=1 Y=\"${#Topbar}.Y + 1\" width=\"$application.width\" height=\"$application.height - 1\" id=\"AppListContainer\" class=\"AppListContainer\" />\
 \
 \009<!-- Right Sidebar -->\
 \009<Container X=\"$application.width + 1\" Y=\"${#Topbar}.Y + 1\" width=20 height=\"$application.height - 1\" id=\"Sidebar\" class=\"Sidebar\">\
@@ -310,21 +360,6 @@ App:start()",
 \
 \009\009</TabbedPageContainer>\
 \009</Container>\
-\
-\009<!-- App List -->\
-\
-\
-\
-\009<!-- Dialogs -->\
-\009<Window X=\"$(application.width - self.width) / 2\" Y=\"$application.height + 1\" width=25 height=7 titleBar=\"false\" resizeable=\"false\" moveable=\"false\" Z=9999 id=\"Dialog\" class=\"Dialog\">\
-\009\009\
-\009\009<Label X=2 Y=2 text=\"\" id=\"DialogLabel\" />\
-\
-\009\009<Button X=\"$parent.width - self.width\" Y=\"$parent.height - 1\" width=\"$#self.text\" text=\" \" id=\"DialogButtonRight\" class=\"DialogButton\"/>\
-\009\009<Button X=\"${#DialogButtonRight}.X - self.width - 1\" Y=\"$parent.height - 1\" width=\"$#self.text\" text=\" \" id=\"DialogButtonLeft\" class=\"DialogButton\"/>\
-\
-\009</Window>\
-\
 </Container>",
 }local env = type( getfenv ) == "function" and getfenv() or _ENV or _G
 if env.TI_VFS_RAW then env = env.TI_VFS_RAW end
@@ -556,7 +591,7 @@ end
 local ok, err = loadfile "/.tpm/bin/tpm"
 if not ok then return error("Failed to load TPM '"..tostring( err ).."'") end
 
---ok( "--fetch", "--disposable", "--depend", shell.getRunningProgram(), "install", "Titanium:latest" )
+ok( "--fetch", "--disposable", "--depend", shell.getRunningProgram(), "install", "Titanium:latest" )
 local FAILURE = "Failed to execute Titanium package. Latest Titanium version cannot be found %s (/.tpm/cache)"
 if not fs.exists("/.tpm/cache") then
     return error( FAILURE:format "because TPM cache is missing" )

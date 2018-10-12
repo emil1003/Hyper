@@ -1,9 +1,9 @@
-# EmilOS (Titanium)
+# Hyper
 The powerful ComputerCraft OS.
 This is a remake of the original EmilOS (based on now deprecated EmilOS-2 alphas), using Titanium.
 
 # Installation
-If only the OS itself is wanted, then downloading and running `EmilOS.tpkg` is the only required step. The package will take care of the rest.
+If only the OS itself is wanted, then downloading and running `Hyper.tpkg` is the only required step. The package will take care of the rest.
 
 # Building
 If you're interested in modifying and building the code yourself, here's the steps:

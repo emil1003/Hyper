@@ -28,7 +28,15 @@ local Topbar = {
 
 	clock = getNode "#TopbarClock",
 	searchButton = getNode "#TopbarSearchButton",
-	sidebarButton = getNode "#TopbarSidebarButton"
+	sidebarButton = getNode "#TopbarSidebarButton",
+
+	dragStartedOn = false
+}
+
+local AppList = {
+	--self = getNode "#AppList", Not yet implemented
+
+	container = getNode "#AppListContainer"
 }
 
 local Sidebar = {
@@ -65,12 +73,13 @@ end
 
 function Dialog:create( label, buttonRight, buttonLeft, funcRight, funcLeft )
 	Dialog.label:setText( label )
-	Dialog.rightButton:setText( buttonRight and buttonRight or "" )
-	Dialog.rightButton:on( "trigger", function()
+	Dialog.rightButton:off( "trigger" ):on( "trigger", function()
 		Dialog.self:animate( "dialog", "Y", App.height + 1, 0.3, "inCubic" )
 		if funcRight then funcRight() end
 	end)
+	Dialog.rightButton:setText( buttonRight and buttonRight or "" )
 	Dialog.leftButton:setText( buttonLeft and buttonLeft or "" )
+	Dialog.leftButton:off( "trigger" )
 	Dialog.leftButton:on( "trigger", function()
 		Dialog.self:animate( "dialog", "Y", App.height + 1, 0.3, "inCubic" )
 		if funcLeft then funcLeft() end
@@ -107,11 +116,34 @@ Topbar.menuButton:on( "trigger", function()
 			{"button", " Reboot ", function() os.reboot() end},
 			{"button", " Shutdown ", function() os.shutdown() end}
 		}}
-	}, 2, 2 ))
+	}, 2, Topbar.self.Y + 1 ))
 end)
 
-Sidebar.tabContainer:selectPage( "SidebarNotifications" )
 Topbar.sidebarButton:on( "trigger", Sidebar.toggle )
+Topbar.searchButton:on( "trigger", function() Topbar.self:animate( "topbar", "Y", 10, 0.3, "outCubic" ) end)
+
+Sidebar.tabContainer:selectPage( "SidebarNotifications" )
+
+-- Set some global event listeners
+App:on( "mouse_click", function( _, event )
+	if event.button == 1 then
+		if event.Y == Topbar.self.Y then Topbar.dragStartedOn = true end
+		if event.X < Sidebar.self.X and Sidebar.isOpen and not Topbar.dragStartedOn then Sidebar:toggle() end
+	end
+end)
+
+App:on( "mouse_drag", function( _, event )
+	if event.button == 1 then
+		if Topbar.dragStartedOn then
+			Topbar.self.Y = event.Y
+			event.handled = true
+		end
+	end
+end)
+
+App:on( "mouse_up", function( _, event )
+	Topbar.dragStartedOn = false
+end)
 
 -- Start Titanium event loop
 App:schedule( function() Topbar.clock:update() end, 0.5, true )
