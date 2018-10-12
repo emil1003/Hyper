@@ -27,16 +27,18 @@
 			</Page>
 
 		</TabbedPageContainer>
+		
 	</Container>
 
-	<!-- Dialogs -->
-	<Window X="$(application.width - self.width) / 2" Y="$application.height + 1" width=25 height=7 titleBar="false" resizeable="false" moveable="false" Z=9999 id="Dialog" class="Dialog">
-		
-		<Label X=2 Y=2 text="" id="DialogLabel" />
-
-		<Button X="$parent.width - self.width" Y="$parent.height - 1" width="$#self.text" text=" " id="DialogButtonRight" class="DialogButton"/>
-		<Button X="${#DialogButtonRight}.X - self.width - 1" Y="$parent.height - 1" width="$#self.text" text=" " id="DialogButtonLeft" class="DialogButton"/>
-
-	</Window>
-	
 </Container>
+
+
+<!-- Dialogs -->
+<Window X="$(application.width - self.width) / 2" Y="$application.height + 1" width=25 height=7 titleBar="false" resizeable="false" moveable="false" Z=9999 id="Dialog" class="Dialog">
+	
+	<Label X=2 Y=2 text="" id="DialogLabel" />
+
+	<Button X="$parent.width - self.width" Y="$parent.height - 1" width="$#self.text" text=" " id="DialogButtonRight" class="DialogButton"/>
+	<Button X="${#DialogButtonRight}.X - self.width - 1" Y="$parent.height - 1" width="$#self.text" text=" " id="DialogButtonLeft" class="DialogButton"/>
+
+</Window>
