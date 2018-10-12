@@ -73,14 +73,13 @@ end
 
 function Dialog:create( label, buttonRight, buttonLeft, funcRight, funcLeft )
 	Dialog.label:setText( label )
+	Dialog.rightButton:setText( buttonRight and buttonRight or "" )
 	Dialog.rightButton:off( "trigger" ):on( "trigger", function()
 		Dialog.self:animate( "dialog", "Y", App.height + 1, 0.3, "inCubic" )
 		if funcRight then funcRight() end
 	end)
-	Dialog.rightButton:setText( buttonRight and buttonRight or "" )
 	Dialog.leftButton:setText( buttonLeft and buttonLeft or "" )
-	Dialog.leftButton:off( "trigger" )
-	Dialog.leftButton:on( "trigger", function()
+	Dialog.leftButton:off( "trigger" ):on( "trigger", function()
 		Dialog.self:animate( "dialog", "Y", App.height + 1, 0.3, "inCubic" )
 		if funcLeft then funcLeft() end
 	end)
@@ -141,7 +140,7 @@ App:on( "mouse_drag", function( _, event )
 	end
 end)
 
-App:on( "mouse_up", function( _, event )
+App:on( "mouse_up", function()
 	Topbar.dragStartedOn = false
 end)
 
