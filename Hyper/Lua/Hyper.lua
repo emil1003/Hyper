@@ -127,20 +127,19 @@ Sidebar.tabContainer:selectPage( "SidebarNotifications" )
 App:on( "mouse_click", function( _, event )
 	if event.button == 1 then
 		if event.Y == Topbar.self.Y then Topbar.dragStartedOn = true end
-		if event.X < Sidebar.self.X and Sidebar.isOpen and not Topbar.dragStartedOn then Sidebar:toggle() end
+		if event.X < Sidebar.self.X and Sidebar.isOpen and not Topbar.dragStartedOn then
+			Sidebar:toggle()
+			event.handled = true
+		end
 	end
-end)
-
-App:on( "mouse_drag", function( _, event )
+end):on( "mouse_drag", function( _, event )
 	if event.button == 1 then
 		if Topbar.dragStartedOn then
 			Topbar.self.Y = event.Y
 			event.handled = true
 		end
 	end
-end)
-
-App:on( "mouse_up", function()
+end):on( "mouse_up", function()
 	Topbar.dragStartedOn = false
 end)
 

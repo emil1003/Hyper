@@ -244,20 +244,19 @@ Sidebar.tabContainer:selectPage( \"SidebarNotifications\" )\
 App:on( \"mouse_click\", function( _, event )\
 \009if event.button == 1 then\
 \009\009if event.Y == Topbar.self.Y then Topbar.dragStartedOn = true end\
-\009\009if event.X < Sidebar.self.X and Sidebar.isOpen and not Topbar.dragStartedOn then Sidebar:toggle() end\
+\009\009if event.X < Sidebar.self.X and Sidebar.isOpen and not Topbar.dragStartedOn then\
+\009\009\009Sidebar:toggle()\
+\009\009\009event.handled = true\
+\009\009end\
 \009end\
-end)\
-\
-App:on( \"mouse_drag\", function( _, event )\
+end):on( \"mouse_drag\", function( _, event )\
 \009if event.button == 1 then\
 \009\009if Topbar.dragStartedOn then\
 \009\009\009Topbar.self.Y = event.Y\
 \009\009\009event.handled = true\
 \009\009end\
 \009end\
-end)\
-\
-App:on( \"mouse_up\", function()\
+end):on( \"mouse_up\", function()\
 \009Topbar.dragStartedOn = false\
 end)\
 \
@@ -349,14 +348,14 @@ App:start()",
 \009\009\009</Page>\
 \
 \009\009</TabbedPageContainer>\
-\009\009\
+\
 \009</Container>\
 \
 </Container>\
 \
 \
 <!-- Dialogs -->\
-<Window X=\"$(application.width - self.width) / 2\" Y=\"$application.height + 1\" width=25 height=7 titleBar=\"false\" resizeable=\"false\" moveable=\"false\" Z=9999 id=\"Dialog\" class=\"Dialog\">\
+<Window X=\"$(application.width - self.width) / 2\" Y=\"$application.height + 1\" width=25 height=7 titleBar=\"false\" resizeable=\"false\" moveable=\"false\" Z=24 id=\"Dialog\" class=\"Dialog\">\
 \009\
 \009<Label X=2 Y=2 text=\"\" id=\"DialogLabel\" />\
 \
