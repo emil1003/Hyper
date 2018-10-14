@@ -229,8 +229,14 @@ Topbar.menuButton:on( \"trigger\", function()\
 \009\009\009\009App:removeNode( Topbar.Menu )\
 \009\009\009\009Dialog:create( \"Log out?\", \"Yes\", \"No\", function() App:stop() end )\
 \009\009\009end},\
-\009\009\009{\"button\", \" Reboot \", function() os.reboot() end},\
-\009\009\009{\"button\", \" Shutdown \", function() os.shutdown() end}\
+\009\009\009{\"button\", \" Reboot \", function()\
+\009\009\009\009App:removeNode( Topbar.Menu )\
+\009\009\009\009Dialog:create( \"Reboot?\", \"Yes\", \"No\", os.reboot)\
+\009\009\009end},\
+\009\009\009{\"button\", \" Shutdown \", function()\
+\009\009\009\009App:removeNode( Topbar.Menu )\
+\009\009\009\009Dialog:create( \"Shut down?\", \"Yes\", \"No\", os.shutdown)\
+\009\009\009end}\
 \009\009}}\
 \009}, 2, Topbar.self.Y + 1 ))\
 end)\

@@ -112,8 +112,14 @@ Topbar.menuButton:on( "trigger", function()
 				App:removeNode( Topbar.Menu )
 				Dialog:create( "Log out?", "Yes", "No", function() App:stop() end )
 			end},
-			{"button", " Reboot ", function() os.reboot() end},
-			{"button", " Shutdown ", function() os.shutdown() end}
+			{"button", " Reboot ", function()
+				App:removeNode( Topbar.Menu )
+				Dialog:create( "Reboot?", "Yes", "No", os.reboot)
+			end},
+			{"button", " Shutdown ", function()
+				App:removeNode( Topbar.Menu )
+				Dialog:create( "Shut down?", "Yes", "No", os.shutdown)
+			end}
 		}}
 	}, 2, Topbar.self.Y + 1 ))
 end)
