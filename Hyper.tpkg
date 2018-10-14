@@ -115,6 +115,76 @@ configureConstructor {\
 }",
 }
 local vfsAssets = {
+  [ "Hyper/Lua/pre-init.lua" ] = "--[[\
+\009Hyper pre-init script\
+]]\
+\
+local X, Y = term.getSize()\
+\
+-- Load some bootloader settings from .hyper.conf\
+\
+term.setBackgroundColor(colors.white)\
+term.setTextColor(colors.gray)\
+term.clear()\
+\
+term.setCursorPos(2, Y - 1)\
+write(\"Hold SHIFT for boot options\")",
+  [ "Hyper/UI/Themes/Hyper.theme" ] = "<!-- Hyper Theme -->\
+\
+<!-- Application -->\
+<Container class=\"Application\">\
+\009<color>black</color>\
+\009<backgroundColor>black</backgroundColor>\
+</Container>\
+\
+<!-- Topbar -->\
+<Container class=\"Topbar\">\
+\009<color>lightGray</color>\
+\009<backgroundColor>gray</backgroundColor>\
+</Container>\
+\
+<Button class=\"Topbar\">\
+\009<color>lightGray</color>\
+\009<backgroundColor>gray</backgroundColor>\
+\009<activeColor>white</activeColor>\
+\009<activeBackgroundColor>lightBlue</activeBackgroundColor>\
+</Button>\
+\
+<ClockView class=\"Topbar Clock\">\
+\009<color>lightGray</color>\
+\009<backgroundColor>gray</backgroundColor>\
+</ClockView>\
+\
+<ContextMenu>\
+\009<color>white</color>\
+\009<backgroundColor>gray</backgroundColor>\
+</ContextMenu>\
+\
+<!-- App List -->\
+<Container class=\"AppListContainer\">\
+\009<color>white</color>\
+\009<backgroundColor>cyan</backgroundColor>\
+</Container>\
+\
+<!-- Sidebar -->\
+<Container class=\"Sidebar\">\
+\009<color>black</color>\
+\009<backgroundColor>lightGray</backgroundColor>\
+</Container>\
+\
+<!-- TabbedPageContainer is handled in the Lua file -->\
+\
+<!-- Dialogs -->\
+<Window class=\"Dialog\">\
+\009<color>black</color>\
+\009<backgroundColor>white</backgroundColor>\
+</Window>\
+\
+<Button class=\"DialogButton\">\
+\009<color>cyan</color>\
+\009<activeColor>white</activeColor>\
+\009<activeBackgroundColor>lightBlue</activeBackgroundColor>\
+</Button>",
   [ "Hyper/Lua/Hyper.lua" ] = "--[[\
 \009Hyper, the easy-to-use ComputerCraft OS.\
 \009Evolution of the original EmilOS.\
@@ -269,62 +339,6 @@ end)\
 -- Start Titanium event loop\
 App:schedule( function() Topbar.clock:update() end, 0.5, true )\
 App:start()",
-  [ "Hyper/UI/Themes/Hyper.theme" ] = "<!-- Hyper Theme -->\
-\
-<!-- Application -->\
-<Container class=\"Application\">\
-\009<color>black</color>\
-\009<backgroundColor>black</backgroundColor>\
-</Container>\
-\
-<!-- Topbar -->\
-<Container class=\"Topbar\">\
-\009<color>lightGray</color>\
-\009<backgroundColor>gray</backgroundColor>\
-</Container>\
-\
-<Button class=\"Topbar\">\
-\009<color>lightGray</color>\
-\009<backgroundColor>gray</backgroundColor>\
-\009<activeColor>white</activeColor>\
-\009<activeBackgroundColor>lightBlue</activeBackgroundColor>\
-</Button>\
-\
-<ClockView class=\"Topbar Clock\">\
-\009<color>lightGray</color>\
-\009<backgroundColor>gray</backgroundColor>\
-</ClockView>\
-\
-<ContextMenu>\
-\009<color>white</color>\
-\009<backgroundColor>gray</backgroundColor>\
-</ContextMenu>\
-\
-<!-- App List -->\
-<Container class=\"AppListContainer\">\
-\009<color>white</color>\
-\009<backgroundColor>cyan</backgroundColor>\
-</Container>\
-\
-<!-- Sidebar -->\
-<Container class=\"Sidebar\">\
-\009<color>black</color>\
-\009<backgroundColor>lightGray</backgroundColor>\
-</Container>\
-\
-<!-- TabbedPageContainer is handled in the Lua file -->\
-\
-<!-- Dialogs -->\
-<Window class=\"Dialog\">\
-\009<color>black</color>\
-\009<backgroundColor>white</backgroundColor>\
-</Window>\
-\
-<Button class=\"DialogButton\">\
-\009<color>cyan</color>\
-\009<activeColor>white</activeColor>\
-\009<activeBackgroundColor>lightBlue</activeBackgroundColor>\
-</Button>",
   [ "Hyper/UI/TML/Hyper.tml" ] = "<Container X=1 Y=1 width=\"$application.width\" height=\"$application.height\" id=\"Application\" class=\"Application\">\
 \
 \009<!-- Topbar -->\
@@ -373,13 +387,13 @@ App:start()",
 if env.TI_VFS_RAW then env = env.TI_VFS_RAW end
 local fallbackFS = env.fs
 local RAW = setmetatable({
-    fs = setmetatable( {}, { __index = _G["fs"] }),
+    fs = fallbackFS,
     os = setmetatable( {}, { __index = _G["os"] } )
 }, { __index = env })
 
-local VFS = RAW["fs"]
+local VFS = setmetatable( {}, { __index = RAW.fs } )
 local VFS_ENV = setmetatable({},{__index = function( _, key )
-    if key == "TI_VFS_RAW" then return RAW end
+    if key == "TI_VFS_RAW" then return RAW elseif key == "fs" then return VFS end
     return RAW[ key ]
 end})
 
@@ -586,6 +600,7 @@ function VFS.exists( path )
 
     return fallbackFS.exists( fs.combine( exportDirectory, path ) )
 end
+local fn, err = VFS_ENV.loadfile 'Hyper/Lua/pre-init.lua'if fn then fn( unpack( args ) ) else return error('Failed to run file from bundle: "'..tostring( err )..'"') end
 if not fs.exists( "/.tpm/bin/tpm" ) then
     local h = http.get "https://gitlab.com/hbomb79/Titanium-Package-Manager/raw/master/tpm"
     if not h then return error "Failed to download TPM" end
@@ -599,7 +614,7 @@ end
 local ok, err = loadfile "/.tpm/bin/tpm"
 if not ok then return error("Failed to load TPM '"..tostring( err ).."'") end
 
-ok( "--fetch", "--disposable", "--depend", shell.getRunningProgram(), "install", "Titanium:latest" )
+ok( "--fetch", "--disposable", "--depend", shell.getRunningProgram(), "install", "Titanium:latest", "--silent" )
 local FAILURE = "Failed to execute Titanium package. Latest Titanium version cannot be found %s (/.tpm/cache)"
 if not fs.exists("/.tpm/cache") then
     return error( FAILURE:format "because TPM cache is missing" )
