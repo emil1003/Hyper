@@ -6,8 +6,13 @@
 	Titanium is (c) 2016 Harry Felton.
 ]]
 
+-- Make application instance fit the entire screen
+local termSize = {term.getSize()}
+
 -- Application Instance
 local App = Application():set({
+	width = termSize[1],
+	height = termSize[2],
 	terminatable = true,
 	color = colors.black,
 	backgroundColor = colors.white

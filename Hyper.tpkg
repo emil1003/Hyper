@@ -1,27 +1,121 @@
-local _d,ad={...},""
-if _d[1]and _d[1]~="--"then ad=_d[1]or""end;table.remove(_d,1)
-if _d[1]=="--"then table.remove(_d,1)end
-local bd={["ListView.ti"]="class\"ListView\"\
-extends\"ScrollContainer\"{totalNodeHeight=0}function ListView:__init__(...)self:super(...)end\
-function ListView:addNode(a)\
-if not\
-Titanium.typeOf(a,\"Node\",true)then return\
-error(\"Cannot add '\"..tostring(a)..\
-\"' as Node on '\"..tostring(self)..\"'\")end\
-if self.totalNodeHeight>0 then a.Y=self.totalNodeHeight end;self.totalNodeHeight=self.totalNodeHeight+a.height\
-self.super:addNode(a)self.changed=true end;function ListView:clearNodes()self.super:clearNodes()\
-self.totalNodeHeight=0 end;function ListView:draw(a)if self.changed or a then\
-self.super:draw()end end",["ClockView.ti"]="class\"ClockView\"\
-extends\"Node\"{clockType=1,color=colors.lightGray,backgroundColor=colors.gray}\
-function ClockView:__init__(...)self:resolve(...)self:super()\
-self:register(\"color\",\"backgroundColor\")self:update()end\
+--[[
+    Built using Titanium Packager (Harry Felton - hbomb79)
+
+    Install pakager, and other Titanium developer tools via 'pastebin run 5B9k1jZg'
+]]
+local args, exportDirectory = { ... }, ""
+if args[ 1 ] and args[ 1 ] ~= "--" then exportDirectory = args[ 1 ] or "" end
+table.remove( args, 1 )
+if args[ 1 ] == "--" then table.remove( args, 1 ) end
+local classSource = {
+  [ "ListView.ti" ] = "--[[\
+\009Displays nodes as a vertically scrolling list\
+]]\
+\
+class \"ListView\" extends \"ScrollContainer\" {\
+\009totalNodeHeight = 0;\
+}\
+\
+--[[\
+\009@constructor\
+\009@desc Resolves constructor arguments and invokes super.\
+\009@param <table - structure>*\
+]]\
+function ListView:__init__( ... )\
+\009self:super( ... )\
+\
+\009--self.xScrollAllowed = false\
+end\
+\
+--[[\
+\009@instance\
+\009@desc Inserts a node at the bottom of the list.\
+\009@param <Node - node>\
+]]\
+function ListView:addNode( node )\
+\009if not Titanium.typeOf( node, \"Node\", true ) then\
+\009\009return error( \"Cannot add '\"..tostring( node )..\"' as Node on '\"..tostring( self )..\"'\" )\
+\009end\
+\
+\009if self.totalNodeHeight > 0 then\
+\009\009node.Y = self.totalNodeHeight\
+\009end\
+\009self.totalNodeHeight = self.totalNodeHeight + node.height\
+\009self.super:addNode( node )\
+\009--self.width = self.width < node.width and node.width or self.width\
+\009self.changed = true\
+end\
+\
+function ListView:clearNodes()\
+\009self.super:clearNodes()\
+\009self.totalNodeHeight = 0\
+end\
+\
+--[[\
+\009@instance\
+\009@desc Draw the node.\
+\009@param <boolean - force>*\
+]]\
+function ListView:draw( force )\
+\009if self.changed or force then\
+\009\009self.super:draw()\
+\009end\
+end",
+  [ "ClockView.ti" ] = "--[[\
+\009A simple class \"that\" makes displaying a clock easy.\
+\009NOTE: Add :update() to Application:schedule(), preferably with a .5 sec delay and repeating.\
+]]\
+class \"ClockView\" extends \"Node\" {\
+\009clockType = 1;\
+\
+\009color = colors.lightGray;\
+\009backgroundColor = colors.gray;\
+}\
+\
+--[[\
+\009@constructor\
+\009@desc Init instance and watch the property 'text'\
+\009@param <table - structure>*\
+]]\
+function ClockView:__init__( ... )\
+\009self:resolve( ... )\
+\009self:super()\
+\
+\009self:register( \"color\", \"backgroundColor\" )\
+\
+    self:update()\
+end\
+\
+--[[\
+\009@instance\
+\009@desc Updates the clock text (clockType 1 = 24 hr clock)\
+]]\
 function ClockView:update()\
-local a=textutils.formatTime(os.time(),self.clockType==1 and true or false)\
-if self.text~=a then self.text=a;self.width=#a;self.changed=true end end\
-function ClockView:draw(a)if self.changed or a then\
-self.canvas:drawTextLine(1,1,self.text,self.color,self.backgroundColor)end end\
-configureConstructor{argumentTypes={clockType=\"number\",color=\"colour\",backgroundColor=\"colour\"}}"}
-local cd={["Hyper/UI/TML/Hyper.tml"]="<Container X=1 Y=1 width=\"$application.width\" height=\"$application.height\" id=\"Application\" class=\"Application\">\
+\009local newTime = textutils.formatTime( os.time(), self.clockType == 1 and true or false )\
+\009if self.text ~= newTime then\
+\009\009self.text = newTime\
+\009\009self.width = #newTime\
+\009\009self.changed = true\
+\009end\
+end\
+\
+--[[\
+\009@instance\
+\009@desc Draws the node\
+\009@param <boolean - force>*\
+]]\
+function ClockView:draw( force )\
+\009if self.changed or force then\
+\009\009self.canvas:drawTextLine( 1, 1, self.text, self.color, self.backgroundColor )\
+\009end\
+end\
+\
+configureConstructor {\
+\009argumentTypes = { clockType = \"number\", color = \"colour\", backgroundColor = \"colour\" }\
+}",
+}
+local vfsAssets = {
+  [ "Hyper/UI/TML/Hyper.tml" ] = "<Container X=1 Y=1 width=\"$application.width\" height=\"$application.height\" id=\"Application\" class=\"Application\">\
 \
 \009<!-- Topbar -->\
 \009<Container X=1 Y=1 width=\"$application.width\" height=1 id=\"Topbar\" class=\"Topbar\">\
@@ -64,8 +158,24 @@ local cd={["Hyper/UI/TML/Hyper.tml"]="<Container X=1 Y=1 width=\"$application.wi
 \009<Button X=\"$parent.width - self.width\" Y=\"$parent.height - 1\" width=\"$#self.text\" text=\" \" id=\"DialogButtonRight\" class=\"DialogButton\"/>\
 \009<Button X=\"${#DialogButtonRight}.X - self.width - 1\" Y=\"$parent.height - 1\" width=\"$#self.text\" text=\" \" id=\"DialogButtonLeft\" class=\"DialogButton\"/>\
 \
-</Window>",["Hyper/Titanium/Titanium.lua"]="\
-local aa={[\"MThemeManager.ti\"]=\"local c=os.clock()local function d()os.queueEvent\\\"themeYield\\\"\\\
+</Window>",
+  [ "Hyper/Lua/pre-init.lua" ] = "--[[\
+\009Hyper pre-init script\
+]]\
+\
+local X, Y = term.getSize()\
+\
+term.setBackgroundColor(colors.white)\
+term.setTextColor(colors.gray)\
+term.clear()\
+\
+term.setCursorPos(2, Y - 1)\
+write(\"Hold SHIFT for boot options\")\
+\
+-- Load self contained Titanium package\
+dofile(\"Hyper/Titanium/Titanium.lua\")",
+  [ "Hyper/Titanium/Titanium.lua" ] = "local files = {\
+[\"MThemeManager.ti\"]=\"local c=os.clock()local function d()os.queueEvent\\\"themeYield\\\"\\\
 os.pullEvent\\\"themeYield\\\"c=os.clock()end\\\
 class\\\"MThemeManager\\\"abstract(){themes={}}\\\
 function MThemeManager:addTheme(_a)\\\
@@ -85,7 +195,8 @@ for r=1,#ab do bb[#bb+1]=ab[r]end end end end;self.rules=aa;self:dispatchThemeRu
 function MThemeManager:dispatchThemeRules()\\\
 local function _a(aa)d()for i=1,#aa do if os.clock()-c>8 then d()end\\\
 aa[i]:retrieveThemes()end end;_a(self.collatedNodes)\\\
-self.dialogContainer:retrieveThemes()_a(self.dialogContainer.collatedNodes)end\",[\"QueryParser.ti\"]=\"\\\
+self.dialogContainer:retrieveThemes()_a(self.dialogContainer.collatedNodes)end\",\
+[\"QueryParser.ti\"]=\"\\\
 local function b(c)if c==\\\"true\\\"then return true elseif c==\\\"false\\\"then return false else\\\
 return tonumber(c)or tostring(c)end end;class\\\"QueryParser\\\"extends\\\"Parser\\\"function QueryParser:__init__(c)\\\
 self:super(QueryLexer(c).tokens)end\\\
@@ -135,7 +246,8 @@ self:throw(\\\
 \\\"Unexpected '\\\"..tostring(_a.value)..\\\
 \\\"' (\\\".._a.type..\\\") inside of condition block\\\")end;_a=self:stepForward()end;if next(d)then c[#c+1]=d elseif#c==0 then\\\
 self:throw\\\"Unexpected ']'. No conditions were defined (empty condition block)\\\"end;return\\\
-#c>0 and c or nil end\",[\"Theme.ti\"]=\"\\\
+#c>0 and c or nil end\",\
+[\"Theme.ti\"]=\"\\\
 local function c(_a)\\\
 return\\\
 \\\
@@ -176,13 +288,15 @@ error(\\\"Failed to generate theme data. Invalid theme rule found. No value (XML
 function Theme.static.fromFile(_a,aa)if not fs.exists(aa)then\\\
 return error(\\\"Path '\\\"..\\\
 tostring(aa)..\\\"' cannot be found\\\")end;local ba=fs.open(aa,\\\"r\\\")\\\
-local ca=ba.readAll()ba.close()return Theme(_a,ca)end\",[\"Pane.ti\"]=\"class\\\"Pane\\\"\\\
+local ca=ba.readAll()ba.close()return Theme(_a,ca)end\",\
+[\"Pane.ti\"]=\"class\\\"Pane\\\"\\\
 extends\\\"Node\\\"{backgroundColour=colours.black,allowMouse=true,useAnyCallbacks=true}\\\
 function Pane:__init__(...)self:resolve(...)self:super()end\\\
 function Pane:draw(a)local b=self.raw;if b.changed or a then b.canvas:clear()\\\
 b.changed=false end end\\\
 function Pane:onMouse(a,b,c)if not c or b then return end;a.handled=true end\\\
-configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\",\\\"width\\\",\\\"height\\\",\\\"backgroundColour\\\"}},true)\",[\"DynamicEqParser.ti\"]=\"local d={\\\"NAME\\\",\\\"STRING\\\",\\\"NUMBER\\\",\\\"PAREN\\\",\\\"QUERY\\\"}\\\
+configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\",\\\"width\\\",\\\"height\\\",\\\"backgroundColour\\\"}},true)\",\
+[\"DynamicEqParser.ti\"]=\"local d={\\\"NAME\\\",\\\"STRING\\\",\\\"NUMBER\\\",\\\"PAREN\\\",\\\"QUERY\\\"}\\\
 local _a={\\\"binary\\\",\\\"ambiguos\\\"}local aa={\\\"unary\\\",\\\"ambiguos\\\"}class\\\"DynamicEqParser\\\"\\\
 extends\\\"Parser\\\"{state=\\\"root\\\",stacks={{}},output=\\\"local args = ...; return \\\"}function DynamicEqParser:__init__(ba)\\\
 self:super(DynamicEqLexer(ba).tokens)end\\\
@@ -289,14 +403,16 @@ local ba=self:stepForward()\\\
 while ba do\\\
 if self.state==\\\"root\\\"then self:parseRootState()elseif self.state==\\\"name\\\"then\\\
 self:parseNameState()else\\\
-self:throw(\\\"Invalid parser state '\\\"..self.state..\\\"'\\\")end;ba=self:stepForward()end end\",[\"DialogWindow.ti\"]=\"class\\\"DialogWindow\\\"\\\
+self:throw(\\\"Invalid parser state '\\\"..self.state..\\\"'\\\")end;ba=self:stepForward()end end\",\
+[\"DialogWindow.ti\"]=\"class\\\"DialogWindow\\\"\\\
 extends\\\"Window\\\"{body=\\\"This is a dialog window\\\"}\\\
 function DialogWindow:__init__(...)\\\
 self.bodyText=TextContainer(\\\"\\\"):set(\\\"id\\\",\\\"TEST\\\"):set{text=\\\"$parent.parent.body\\\",X=1,Y=1,width=\\\"$parent.width\\\",height=\\\"$parent.height - 3 < 2 and 2 or parent.height - 3\\\",colour=256,horizontalAlign=\\\"centre\\\",Z=1}\\\
 self.actionContainer=ScrollContainer(2):set{id=\\\"TESTING\\\",Y=\\\"$parent.height - 1\\\",width=\\\"$parent.width - 2\\\",height=2,fluidPositions=true,Z=2,positioning=\\\"fluid\\\"}self:super(...)\\\
 self.content:addNode(self.bodyText)self.content:addNode(self.actionContainer)end;function DialogWindow:createProxies()\\\
 self.super:createProxies(self.actionContainer)end\\\
-configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\",\\\"width\\\",\\\"height\\\",\\\"title\\\",\\\"body\\\"},argumentTypes={body=\\\"string\\\"}},true)\",[\"TabbedPageContainer.ti\"]=\"\\\
+configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\",\\\"width\\\",\\\"height\\\",\\\"title\\\",\\\"body\\\"},argumentTypes={body=\\\"string\\\"}},true)\",\
+[\"TabbedPageContainer.ti\"]=\"\\\
 local function b(c,d,_a)\\\
 local aa=Button(c):set{width=1,enabled=\\\"$self.visible\\\",height=\\\"$parent.tabHeight\\\"}\\\
 aa:on(\\\"trigger\\\",function(ba)\\\
@@ -348,11 +464,13 @@ c.height,c.Y=\\\"$parent.height - parent.tabHeight\\\",\\\"$parent.tabHeight + 1
 function TabbedPageContainer:unlinkPage(c)c:removeDynamicValue\\\"height\\\"\\\
 c:removeDynamicValue\\\"Y\\\"c:unlinkProperties(self,\\\"width\\\")end\\\
 function TabbedPageContainer:setScrollButtons(c)self.scrollButtons=c;self:formTabs()end\\\
-configureConstructor{argumentTypes={tabHeight=\\\"number\\\",autoTabWidth=\\\"boolean\\\",tabBackgroundColour=\\\"colour\\\",tabColour=\\\"colour\\\",selectedTabBackgroundColour=\\\"colour\\\",selectedTabColour=\\\"colour\\\",tabScroll=\\\"number\\\",scrollButtons=\\\"boolean\\\",tabAlignment=\\\"string\\\"}}\",[\"KeyEvent.ti\"]=\"class\\\"KeyEvent\\\"\\\
+configureConstructor{argumentTypes={tabHeight=\\\"number\\\",autoTabWidth=\\\"boolean\\\",tabBackgroundColour=\\\"colour\\\",tabColour=\\\"colour\\\",selectedTabBackgroundColour=\\\"colour\\\",selectedTabColour=\\\"colour\\\",tabScroll=\\\"number\\\",scrollButtons=\\\"boolean\\\",tabAlignment=\\\"string\\\"}}\",\
+[\"KeyEvent.ti\"]=\"class\\\"KeyEvent\\\"\\\
 extends\\\"Event\\\"{main=\\\"KEY\\\",sub=false,keyCode=false,keyName=false}\\\
 function KeyEvent:__init__(a,b,c,d)self.name=a\\\
 self.sub=d or a==\\\"key_up\\\"and\\\"UP\\\"or\\\"DOWN\\\"self.held=c;self.keyCode=b;self.keyName=keys.getName(b)\\\
-self.data={a,b,c}end\",[\"MKeyHandler.ti\"]=\"class\\\"MKeyHandler\\\"\\\
+self.data={a,b,c}end\",\
+[\"MKeyHandler.ti\"]=\"class\\\"MKeyHandler\\\"\\\
 abstract(){static={keyAlias={}},keys={},hotkeys={}}\\\
 function MKeyHandler:handleKey(a)local b=a.keyCode\\\
 if a.sub==\\\"DOWN\\\"then self.keys[b]=a.held\\\
@@ -366,7 +484,8 @@ if\\\
 not(type(a)==\\\"string\\\"and type(b)==\\\"string\\\"and\\\
 type(c)==\\\"function\\\")then return error\\\"Expected string, string, function\\\"end;self.hotkeys[a]={b,c}end\\\
 function MKeyHandler:checkHotkeys(a)for b,c in pairs(self.hotkeys)do if self:matchesHotkey(c[1],a)then\\\
-c[2](self,a)end end end\",[\"MProjectorManager.ti\"]=\"class\\\"MProjectorManager\\\"abstract(){projectors={}}\\\
+c[2](self,a)end end end\",\
+[\"MProjectorManager.ti\"]=\"class\\\"MProjectorManager\\\"abstract(){projectors={}}\\\
 function MProjectorManager:updateProjectors()\\\
 local a,b=self.projectors;for i=1,#a do b=a[i]\\\
 if b.changed then b:updateDisplay()b.changed=false end end end\\\
@@ -384,7 +503,8 @@ tostring(a)..\\\"' to remove.\\\")end;local c,d=self.projectors;for i=1,#c do d=
 if\\\
 (b and d.name==a)or(not b and d==a)then d.application=false;table.remove(c,i)return true,d end end;return false end\\\
 function MProjectorManager:getProjector(a)local b=self.projectors;for i=1,#b do\\\
-if b[i].name==a then return b[i]end end end\",[\"TML.ti\"]=\"\\\
+if b[i].name==a then return b[i]end end end\",\
+[\"TML.ti\"]=\"\\\
 local function b(c,d)local _a=c:getRegistry()local aa,ba,ca=_a.constructor,_a.alias,d.arguments;local da=\\\
 aa.requiredArguments or{}local _b,ab,bb={},{},{}if not aa then return nil end\\\
 if\\\
@@ -429,7 +549,8 @@ function TML.static.fromFile(c,d)\\\
 if not Titanium.isInstance(c)then return\\\
 error\\\"Expected Titanium instance as first argument (parent)\\\"end;if not fs.exists(d)then return\\\
 error(\\\"Path \\\"..tostring(d)..\\\" cannot be found\\\")end\\\
-local _a=fs.open(d,\\\"r\\\")local aa=_a.readAll()_a.close()return TML(c,aa)end\",[\"RadioButton.ti\"]=\"class\\\"RadioButton\\\"\\\
+local _a=fs.open(d,\\\"r\\\")local aa=_a.readAll()_a.close()return TML(c,aa)end\",\
+[\"RadioButton.ti\"]=\"class\\\"RadioButton\\\"\\\
 extends\\\"Checkbox\\\"{static={groups={}},group=false}\\\
 function RadioButton:__init__(...)self:super(...)if self.toggled then\\\
 RadioButton.deselectInGroup(self.group,self)end end\\\
@@ -456,16 +577,19 @@ not b or(b and c[i]~=b))then c[i].toggled=false end end end\\\
 function RadioButton.static.getValue(a)local b=RadioButton.groups[a]\\\
 if b then local c;for i=1,#b do\\\
 c=b[i]if c.toggled then return c.value end end end end\\\
-configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\",\\\"group\\\"},requiredArguments={\\\"group\\\"},argumentTypes={group=\\\"string\\\"},useProxy={\\\"group\\\"}},true,true)\",[\"Event.ti\"]=\"class\\\"Event\\\"abstract(){static={matrix={}}}function Event:is(a)return\\\
+configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\",\\\"group\\\"},requiredArguments={\\\"group\\\"},argumentTypes={group=\\\"string\\\"},useProxy={\\\"group\\\"}},true,true)\",\
+[\"Event.ti\"]=\"class\\\"Event\\\"abstract(){static={matrix={}}}function Event:is(a)return\\\
 self.name==a end\\\
 function Event:setHandled(a)self.raw.handled=a end;function Event.static.spawn(a,...)return\\\
 (Event.matrix[a]or GenericEvent)(a,...)end;function Event.static.bindEvent(a,b)\\\
 Event.matrix[a]=\\\
 Titanium.getClass(b)or\\\
 error(\\\"Class '\\\"..tostring(b)..\\\"' cannot be found\\\")end;function Event.static.unbindEvent(a)Event.matrix[a]=\\\
-nil end\",[\"GenericEvent.ti\"]=\"class\\\"GenericEvent\\\"extends\\\"Event\\\"\\\
+nil end\",\
+[\"GenericEvent.ti\"]=\"class\\\"GenericEvent\\\"extends\\\"Event\\\"\\\
 function GenericEvent:__init__(...)local a={...}\\\
-self.name=a[1]self.main=self.name:upper()self.data=a end\",[\"Terminal.ti\"]=\"\\\
+self.name=a[1]self.main=self.name:upper()self.data=a end\",\
+[\"Terminal.ti\"]=\"\\\
 local function b(c)if not c.thread then return false end;return c.thread.running end;class\\\"Terminal\\\"extends\\\"Node\\\"\\\
 mixin\\\"MFocusable\\\"{static={focusedEvents={MOUSE=true,KEY=true,CHAR=true}},canvas=true,displayThreadStatus=true}\\\
 function Terminal:__init__(...)self:resolve(...)self:super()\\\
@@ -502,7 +626,8 @@ if c.main==\\\
 self:focus()else self:unfocus()end\\\
 c=c:clone(self)elseif c.handled then return end;if Terminal.focusedEvents[c.main]and not self.focused then\\\
 return end;self:resume(c)end;function Terminal:draw()end\\\
-configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\",\\\"width\\\",\\\"height\\\",\\\"chunk\\\"},argumentTypes={chunk=\\\"function\\\"},useProxy={\\\"chunk\\\"}},true)\",[\"Input.ti\"]=\"local c,d=string.rep,string.sub;class\\\"Input\\\"extends\\\"Node\\\"\\\
+configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\",\\\"width\\\",\\\"height\\\",\\\"chunk\\\"},argumentTypes={chunk=\\\"function\\\"},useProxy={\\\"chunk\\\"}},true)\",\
+[\"Input.ti\"]=\"local c,d=string.rep,string.sub;class\\\"Input\\\"extends\\\"Node\\\"\\\
 mixin\\\"MActivatable\\\"\\\
 mixin\\\"MFocusable\\\"{position=0,scroll=0,value=\\\"\\\",selection=false,selectedColour=false,selectedBackgroundColour=colours.lightBlue,placeholder=false,placeholderColour=256,allowMouse=true,allowKey=true,allowChar=true,limit=0,mask=\\\"\\\"}\\\
 function Input:__init__(...)self:resolve(...)\\\
@@ -594,7 +719,8 @@ function Input:getCaretInfo(_a)local aa,ba=self:getAbsolutePosition(_a)\\\
 local ca=self.limit\\\
 return\\\
 not self.selection and(ca<=0 or self.position<ca),aa+ (self.position-self.scroll),ba,self.focusedColour end\\\
-configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\",\\\"width\\\"},argumentTypes={value=\\\"string\\\",position=\\\"number\\\",selection=\\\"number\\\",placeholder=\\\"string\\\",placeholderColour=\\\"colour\\\",selectedColour=\\\"colour\\\",selectedBackgroundColour=\\\"colour\\\",limit=\\\"number\\\",mask=\\\"string\\\"},useProxy={\\\"toggled\\\"}},true)\",[\"NodeQuery.ti\"]=\"\\\
+configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\",\\\"width\\\"},argumentTypes={value=\\\"string\\\",position=\\\"number\\\",selection=\\\"number\\\",placeholder=\\\"string\\\",placeholderColour=\\\"colour\\\",selectedColour=\\\"colour\\\",selectedBackgroundColour=\\\"colour\\\",limit=\\\"number\\\",mask=\\\"string\\\"},useProxy={\\\"toggled\\\"}},true)\",\
+[\"NodeQuery.ti\"]=\"\\\
 local function aa(ab,bb,cb)local db=type(ab)==\\\"string\\\"and'\\\"'or\\\"\\\"local _c=type(cb)==\\\
 \\\"string\\\"and'\\\"'or\\\"\\\"return\\\
 (\\\"return %s%s%s %s %s%s%s\\\"):format(db,tostring(ab),db,bb,_c,tostring(cb),_c)end\\\
@@ -630,7 +756,8 @@ function NodeQuery:hasClass(ab)local bb=self.result;for i=1,#bb do\\\
 if not bb[i]:hasClass(ab)then return false end end;return true end\\\
 function NodeQuery:each(ab)local bb=self.result;for i=1,#bb do ab(bb[i])end end\\\
 function NodeQuery:executeOnNodes(ab,...)local bb,cb=self.result;for i=1,#bb do cb=bb[i]if cb:can(ab)then\\\
-cb[ab](cb,...)end end end\",[\"MAnimationManager.ti\"]=\"class\\\"MAnimationManager\\\"\\\
+cb[ab](cb,...)end end end\",\
+[\"MAnimationManager.ti\"]=\"class\\\"MAnimationManager\\\"\\\
 abstract(){animations={},animationTimer=false,time=false}\\\
 function MAnimationManager:updateAnimations()local a=os.clock()-self.time\\\
 local b,c=self.animations;for i=#b,1,-1 do c=b[i]\\\
@@ -653,7 +780,8 @@ for i=1,#c do if\\\
 function MAnimationManager:restartAnimationTimer(a)if self.timer then\\\
 os.cancelTimer(self.timer)end;self.time=os.clock()\\\
 self.timer=os.startTimer(\\\
-type(a)==\\\"number\\\"and a or.05)end\",[\"PageContainer.ti\"]=\"class\\\"PageContainer\\\"\\\
+type(a)==\\\"number\\\"and a or.05)end\",\
+[\"PageContainer.ti\"]=\"class\\\"PageContainer\\\"\\\
 extends\\\"Container\\\"{scroll=0,animationDuration=0.25,animationEasing=\\\"outQuad\\\",customAnimation=false,selectedPage=false}\\\
 function PageContainer:draw(a,b,c)if not self.selectedPage then\\\
 self.canvas:drawTextLine(1,1,\\\"No page selected\\\",16384,1)else\\\
@@ -708,9 +836,11 @@ self.selectedPage.X-1 end end\\\
 function PageContainer:setHeight(a)self.super:setHeight(a)\\\
 self:updatePagePositions()\\\
 if self.selectedPage then self.scroll=self.selectedPage.X-1 end end\\\
-configureConstructor{argumentTypes={animationDuration=\\\"number\\\",animationEasing=\\\"string\\\",customAnimation=\\\"function\\\",selectedPage=\\\"string\\\",scroll=\\\"number\\\"}}\",[\"CharEvent.ti\"]=\"class\\\"CharEvent\\\"\\\
+configureConstructor{argumentTypes={animationDuration=\\\"number\\\",animationEasing=\\\"string\\\",customAnimation=\\\"function\\\",selectedPage=\\\"string\\\",scroll=\\\"number\\\"}}\",\
+[\"CharEvent.ti\"]=\"class\\\"CharEvent\\\"\\\
 extends\\\"Event\\\"{main=\\\"CHAR\\\",char=false}\\\
-function CharEvent:__init__(a,b)self.name=a;self.char=b;self.data={a,b}end\",[\"MDialogManager.ti\"]=\"class\\\"MDialogManager\\\"\\\
+function CharEvent:__init__(a,b)self.name=a;self.char=b;self.data={a,b}end\",\
+[\"MDialogManager.ti\"]=\"class\\\"MDialogManager\\\"\\\
 abstract(){dialogContainer=false}\\\
 function MDialogManager:MDialogManager()\\\
 self.dialogContainer=OverlayContainer():set{id=\\\"application_dialog_container\\\",application=self,parent=self,width=\\\"$application.width\\\",height=\\\"$application.height\\\"}end;function MDialogManager:drawDialogs()local a=self.dialogContainer;a:draw()\\\
@@ -726,7 +856,8 @@ function MDialogManager:shiftDialogFocus(a)local b=self.dialogContainer.nodes;fo
 b[i]==a and#b+1 or i end end;function MDialogManager:removeDialog(a)\\\
 self.dialogContainer:removeNode(a)\\\
 self.isDialogOpen=#self.dialogContainer.nodes>0;return a end\\\
-configureConstructor{argumentTypes={isDialogOpen=\\\"boolean\\\"}}\",[\"MProjectable.ti\"]=\"class\\\"MProjectable\\\"\\\
+configureConstructor{argumentTypes={isDialogOpen=\\\"boolean\\\"}}\",\
+[\"MProjectable.ti\"]=\"class\\\"MProjectable\\\"\\\
 abstract(){projectX=false,projectY=false,projector=false,mirrorProjector=false}function MProjectable:MProjectable()\\\
 self:on(\\\"focus\\\",function(a,b)a:resolveProjectorFocus()end)end\\\
 function MProjectable:resolveProjector()\\\
@@ -745,7 +876,8 @@ self:resolveProjector()end\\\
 function MProjectable:getResolvedProjector()if not self.projector then return end;if\\\
 not self.resolvedProjector then self:resolveProjector()end;return\\\
 self.resolvedProjector end\\\
-configureConstructor{argumentTypes={projectX=\\\"number\\\",projectY=\\\"number\\\",projector=\\\"string\\\",mirrorProjector=\\\"boolean\\\"}}\",[\"Dropdown.ti\"]=\"class\\\"Dropdown\\\"extends\\\"Container\\\"\\\
+configureConstructor{argumentTypes={projectX=\\\"number\\\",projectY=\\\"number\\\",projector=\\\"string\\\",mirrorProjector=\\\"boolean\\\"}}\",\
+[\"Dropdown.ti\"]=\"class\\\"Dropdown\\\"extends\\\"Container\\\"\\\
 mixin\\\"MActivatable\\\"{maxHeight=false,prompt=\\\"Please select\\\",horizontalAlign=\\\"left\\\",openIndicator=\\\" \\\\31\\\",closedIndicator=\\\" \\\\16\\\",backgroundColour=colours.lightBlue,colour=colours.white,activeBackgroundColour=colours.cyan,selectedColour=colours.white,selectedBackgroundColour=colours.grey,selectedOption=false,options={},transparent=true}\\\
 function Dropdown:__init__(...)self:super(...)\\\
 self.optionDisplay=self:addNode(Button\\\"\\\":linkProperties(self,\\\"horizontalAlign\\\",\\\"disabledColour\\\",\\\"disabledBackgroundColour\\\",\\\"activeColour\\\",\\\"activeBackgroundColour\\\"):on(\\\"trigger\\\",function()\\\
@@ -809,7 +941,8 @@ error\\\"Failed to add TML object to Dropdown object. 'Option' tag must include 
 error(\\\"Failed to add TML object to Dropdown object. Only 'Option' tags are accepted, '\\\"..\\\
 tostring(a.type)..\\\"' is invalid\\\")end end\\\
 configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\",\\\"width\\\",\\\"maxHeight\\\",\\\"prompt\\\"},argumentTypes={maxHeight=\\\"number\\\",prompt=\\\"string\\\",selectedColour=\\\"colour\\\",selectedBackgroundColour=\\\"colour\\\"}},true)\\\
-alias{selectedColor=\\\"selectedColour\\\",selectedBackgroundColor=\\\"selectedBackgroundColour\\\"}\",[\"Application.ti\"]=\"class\\\"Application\\\"extends\\\"Component\\\"mixin\\\"MThemeManager\\\"\\\
+alias{selectedColor=\\\"selectedColour\\\",selectedBackgroundColor=\\\"selectedBackgroundColour\\\"}\",\
+[\"Application.ti\"]=\"class\\\"Application\\\"extends\\\"Component\\\"mixin\\\"MThemeManager\\\"\\\
 mixin\\\"MKeyHandler\\\"mixin\\\"MCallbackManager\\\"mixin\\\"MAnimationManager\\\"\\\
 mixin\\\"MNodeContainer\\\"mixin\\\"MProjectorManager\\\"\\\
 mixin\\\"MDialogManager\\\"{width=51,height=19,threads={},timers={},running=false,terminatable=false}\\\
@@ -874,7 +1007,8 @@ self.dialogContainer:handle(b)end;local c,d=self.nodes;for i=#c,1,-1 do d=c[i]\\
 if d then d:handle(b)end end;self:executeCallbacks(a,b)\\\
 self:handleThreads(b,a,...)end;function Application:stop()\\\
 if self.running then self.running=false\\\
-os.queueEvent(\\\"ti_app_close\\\")else return error\\\"Application already stopped\\\"end end\",[\"MTextDisplay.ti\"]=\"\\\
+os.queueEvent(\\\"ti_app_close\\\")else return error\\\"Application already stopped\\\"end end\",\
+[\"MTextDisplay.ti\"]=\"\\\
 local aa,ba,ca,da,_b=string.len,string.find,string.sub,string.gsub,string.match;class\\\"MTextDisplay\\\"\\\
 abstract(){lineConfig={lines=false,alignedLines=false,offsetY=0},verticalPadding=0,horizontalPadding=0,verticalAlign=\\\"top\\\",horizontalAlign=\\\"left\\\",includeNewlines=false}\\\
 function MTextDisplay:MTextDisplay()if Titanium.mixesIn(self,\\\"MThemeable\\\")then\\\
@@ -905,7 +1039,8 @@ for i=1,#cb do local dd,__a=cb[i],_c;local a_a=dd[1]if dc==\\\"centre\\\"then __
 _d-#a_a-_c+1 end;bd:drawTextLine(\\\
 __a+1,i+ac,a_a,bb,ab)end end;function MTextDisplay:setText(ab)if ab==self.text then return end;self.changed=true\\\
 self.text=ab end\\\
-configureConstructor{argumentTypes={verticalPadding=\\\"number\\\",horizontalPadding=\\\"number\\\",verticalAlign=\\\"string\\\",horizontalAlign=\\\"string\\\",text=\\\"string\\\"},tmlContent=\\\"text\\\"}\",[\"DynamicValue.ti\"]=\"\\\
+configureConstructor{argumentTypes={verticalPadding=\\\"number\\\",horizontalPadding=\\\"number\\\",verticalAlign=\\\"string\\\",horizontalAlign=\\\"string\\\",text=\\\"string\\\"},tmlContent=\\\"text\\\"}\",\
+[\"DynamicValue.ti\"]=\"\\\
 class\\\"DynamicValue\\\"{target=false,equation=false,compiledEquation=false,resolvedStacks=false,cachedValues={},attached=false}\\\
 function DynamicValue:__init__(a,b,c,d)\\\
 if\\\
@@ -940,7 +1075,8 @@ local a,b=self.eq:resolveStacks(self.target,true),{}if a then self.resolvedStack
 b[i]=c[2][c[1]]end end\\\
 if self.target then\\\
 local c=Titanium.getClass(self.target.__type).getRegistry().constructor.argumentTypes;self.propertyType=c[self.property]end;self.resolvedStacks,self.cachedValues=a,b\\\
-if a then self:solve()end end\",[\"QueryLexer.ti\"]=\"class\\\"QueryLexer\\\"\\\
+if a then self:solve()end end\",\
+[\"QueryLexer.ti\"]=\"class\\\"QueryLexer\\\"\\\
 extends\\\"Lexer\\\"{static={validSymbols={\\\"==\\\",\\\"<\\\",\\\">\\\",\\\">=\\\",\\\"<=\\\",\\\"~=\\\"}}}\\\
 function QueryLexer:tokenize()\\\
 if\\\
@@ -971,7 +1107,8 @@ self:pushToken{type=\\\"QUERY_COND_CLOSE\\\",value=\\\"]\\\"}self:consume(1)self
 for c,d in\\\
 pairs(QueryLexer.static.validSymbols)do if a:find((\\\"^%s\\\"):format(d))then\\\
 self:pushToken{type=\\\"QUERY_COND_SYMBOL\\\",value=self:consumePattern((\\\"^%s\\\"):format(d))}return end end\\\
-self:throw(\\\"Invalid condition syntax. Expected property near '\\\"..tostring(a:match\\\"%S*\\\")..\\\"'\\\")end end\",[\"MFluidLayout.ti\"]=\"local function c(_a,aa)return _a>aa and _a or aa end;local function d(_a,aa)return\\\
+self:throw(\\\"Invalid condition syntax. Expected property near '\\\"..tostring(a:match\\\"%S*\\\")..\\\"'\\\")end end\",\
+[\"MFluidLayout.ti\"]=\"local function c(_a,aa)return _a>aa and _a or aa end;local function d(_a,aa)return\\\
 _a<aa and _a or aa end;class\\\"MFluidLayout\\\"\\\
 abstract(){fluidPositions=false,fluidDimensions=false,minWidth=1,maxWidth=false,minHeight=1,maxHeight=false,positionChanged=false}\\\
 function MFluidLayout:resolveFluidPositions()local _a=self.nodes;local aa,ba,ca,da,_b,ab=1,1,0,0,0,0\\\
@@ -993,13 +1130,15 @@ d(self.maxWidth,ab)or aa-1)\\\
 self.height=c(self.minHeight,self.maxHeight and d(self.maxHeight,cb)or cb)end;self.positionChanged=false end\\\
 function MFluidLayout:setPositionChanged(_a)self.positionChanged=_a;local aa=self.collatedNodes;for i=1,#aa do\\\
 aa[i].positionChanged=_a end end\\\
-configureConstructor{argumentTypes={minWidth=\\\"number\\\",minHeight=\\\"number\\\",maxWidth=\\\"number\\\",maxHeight=\\\"number\\\",fluidDimensions=\\\"boolean\\\",fluidPositions=\\\"boolean\\\",positionChanged=\\\"boolean\\\"}}\",[\"MActivatable.ti\"]=\"class\\\"MActivatable\\\"\\\
+configureConstructor{argumentTypes={minWidth=\\\"number\\\",minHeight=\\\"number\\\",maxWidth=\\\"number\\\",maxHeight=\\\"number\\\",fluidDimensions=\\\"boolean\\\",fluidPositions=\\\"boolean\\\",positionChanged=\\\"boolean\\\"}}\",\
+[\"MActivatable.ti\"]=\"class\\\"MActivatable\\\"\\\
 abstract(){active=false,activeColour=colours.white,activeBackgroundColour=colours.lightBlue}\\\
 function MActivatable:MActivatable()if Titanium.mixesIn(self,\\\"MThemeable\\\")then\\\
 self:register(\\\"active\\\",\\\"activeColour\\\",\\\"activeBackgroundColour\\\")end end;function MActivatable:setActive(a)local b=self.raw;if b.active==a then return end;b.active=a\\\
 self:queueAreaReset()end\\\
 configureConstructor{argumentTypes={active=\\\"boolean\\\",activeColour=\\\"colour\\\",activeBackgroundColour=\\\"colour\\\"}}\\\
-alias{activeColor=\\\"activeColour\\\",activeBackgroundColor=\\\"activeBackgroundColour\\\"}\",[\"Node.ti\"]=\"class\\\"Node\\\"abstract()extends\\\"Component\\\"mixin\\\"MThemeable\\\"\\\
+alias{activeColor=\\\"activeColour\\\",activeBackgroundColor=\\\"activeBackgroundColour\\\"}\",\
+[\"Node.ti\"]=\"class\\\"Node\\\"abstract()extends\\\"Component\\\"mixin\\\"MThemeable\\\"\\\
 mixin\\\"MCallbackManager\\\"\\\
 mixin\\\"MProjectable\\\"{static={eventMatrix={mouse_click=\\\"onMouseClick\\\",mouse_drag=\\\"onMouseDrag\\\",mouse_up=\\\"onMouseUp\\\",mouse_scroll=\\\"onMouseScroll\\\",key=\\\"onKeyDown\\\",key_up=\\\"onKeyUp\\\",char=\\\"onChar\\\"},anyMatrix={MOUSE=\\\"onMouse\\\",KEY=\\\"onKey\\\"}},disabledColour=128,disabledBackgroundColour=256,allowMouse=false,allowKey=false,allowChar=false,useAnyCallbacks=false,enabled=true,parentEnabled=true,visible=true,needsRedraw=true,parent=false,consumeWhenDisabled=true,Z=1}\\\
 function Node:__init__()\\\
@@ -1057,7 +1196,8 @@ if a[i]==self then\\\
 while true do local c,d=a[i-1],a[i+1]\\\
 if c and c.Z>b then\\\
 a[i],a[i-1]=a[i-1],self;i=i-1 elseif d and d.Z<b then a[i],a[i+1]=a[i+1],self;i=i+1 else break end end;self.changed=true;break end end end;function Node:setZ(a)self.Z=a;self:updateZ()end\\\
-configureConstructor{argumentTypes={enabled=\\\"boolean\\\",visible=\\\"boolean\\\",disabledColour=\\\"colour\\\",disabledBackgroundColour=\\\"colour\\\",consumeWhenDisabled=\\\"boolean\\\",Z=\\\"number\\\",allowMouse=\\\"boolean\\\",allowChar=\\\"boolean\\\",allowKey=\\\"boolean\\\"}}\",[\"Projector.ti\"]=\"class\\\"Projector\\\"\\\
+configureConstructor{argumentTypes={enabled=\\\"boolean\\\",visible=\\\"boolean\\\",disabledColour=\\\"colour\\\",disabledBackgroundColour=\\\"colour\\\",consumeWhenDisabled=\\\"boolean\\\",Z=\\\"number\\\",allowMouse=\\\"boolean\\\",allowChar=\\\"boolean\\\",allowKey=\\\"boolean\\\"}}\",\
+[\"Projector.ti\"]=\"class\\\"Projector\\\"\\\
 extends\\\"Component\\\"{static={modes={}},application=false,target=false,mode=false,mirrors={},name=false}function Projector:__init__(...)self:resolve(...)\\\
 self.canvas=TermCanvas(self)end\\\
 function Projector:updateDisplay()\\\
@@ -1089,7 +1229,8 @@ error\\\"Failed to register projector mode. Expected config table to contain 'mo
 Projector.modes[mode]then return\\\
 error(\\\"Failed to register projector mode. Mode '\\\"..\\\
 tostring(mode)..\\\"' has already been registered\\\")end;Projector.modes[a.mode]=a end\\\
-configureConstructor({orderedArguments={\\\"name\\\",\\\"mode\\\",\\\"target\\\"},requiredArguments=true,argumentTypes={name=\\\"string\\\",mode=\\\"string\\\"},useProxy={\\\"mode\\\"}},true)\",[\"MCallbackManager.ti\"]=\"class\\\"MCallbackManager\\\"abstract(){callbacks={}}\\\
+configureConstructor({orderedArguments={\\\"name\\\",\\\"mode\\\",\\\"target\\\"},requiredArguments=true,argumentTypes={name=\\\"string\\\",mode=\\\"string\\\"},useProxy={\\\"mode\\\"}},true)\",\
+[\"MCallbackManager.ti\"]=\"class\\\"MCallbackManager\\\"abstract(){callbacks={}}\\\
 function MCallbackManager:on(a,b,c)\\\
 if\\\
 \\\
@@ -1102,7 +1243,8 @@ if c then for i=#c,1,-1 do if c[i][2]==b then\\\
 table.remove(c,i)end end end else self.callbacks[a]=nil end;return self end\\\
 function MCallbackManager:executeCallbacks(a,...)local b=self.callbacks[a]if b then for i=1,#b do\\\
 b[i][1](self,...)end end end\\\
-function MCallbackManager:canCallback(a)local b=self.callbacks[a]return b and#b>0 end\",[\"Checkbox.ti\"]=\"class\\\"Checkbox\\\"extends\\\"Node\\\"mixin\\\"MActivatable\\\"\\\
+function MCallbackManager:canCallback(a)local b=self.callbacks[a]return b and#b>0 end\",\
+[\"Checkbox.ti\"]=\"class\\\"Checkbox\\\"extends\\\"Node\\\"mixin\\\"MActivatable\\\"\\\
 mixin\\\"MTogglable\\\"{checkedMark=\\\"x\\\",uncheckedMark=\\\" \\\",allowMouse=true}function Checkbox:__init__(...)self:resolve(...)self:super()\\\
 self:register(\\\"checkedMark\\\",\\\"uncheckedMark\\\")end\\\
 function Checkbox:onMouseClick(a,b,c)if not b then\\\
@@ -1116,7 +1258,8 @@ if not self.enabled then\\\
 d,_a=b.disabledColour,b.disabledBackgroundColour elseif self.active then d,_a=b.activeColour,b.activeBackgroundColour elseif c then\\\
 d,_a=b.toggledColour,b.toggledBackgroundColour end\\\
 b.canvas:drawPoint(1,1,c and b.checkedMark or b.uncheckedMark,d,_a)b.changed=false end end\\\
-configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\"},argumentTypes={checkedMark=\\\"string\\\",uncheckedMark=\\\"string\\\"}},true,true)\",[\"MNodeContainer.ti\"]=\"\\\
+configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\"},argumentTypes={checkedMark=\\\"string\\\",uncheckedMark=\\\"string\\\"}},true,true)\",\
+[\"MNodeContainer.ti\"]=\"\\\
 local function b(c,d)d:queueAreaReset()d.application=nil;d.parent=nil;if c.focusedNode==d then\\\
 d.focused=false end;d:executeCallbacks\\\"remove\\\"c.changed=true\\\
 c:clearCollatedNodes()end;class\\\"MNodeContainer\\\"abstract()\\\
@@ -1180,7 +1323,8 @@ cb:redrawArea(self.X+c-1,self.Y+d-1,_a,aa)end end\\\
 function MNodeContainer:importFromTML(c)TML.fromFile(self,c)self.changed=true end\\\
 function MNodeContainer:replaceWithTML(c)local d,_a=self.nodes;for i=#d,1,-1 do _a=d[i]_a.parent=nil\\\
 _a.application=nil;table.remove(d,i)end\\\
-self:importFromTML(c)end\",[\"MThemeable.ti\"]=\"\\\
+self:importFromTML(c)end\",\
+[\"MThemeable.ti\"]=\"\\\
 local function d(ba,ca,da)local _b=ca.ambiguous and Titanium.typeOf(ba,ca.type)or\\\
 ba.__type==ca.type;if(ca.type==\\\
 \\\"*\\\"or not ca.type or _b)and da then\\\
@@ -1262,7 +1406,8 @@ if\\\
 type(ba)==\\\"string\\\"then return self.classes[ba]elseif type(ba)==\\\"table\\\"then for i=1,#ba do if\\\
 not self.classes[ba[i]]then return false end end;return true else return\\\
 error(\\\
-\\\"Invalid target '\\\"..tostring(ba)..\\\"' for class check\\\")end end\",[\"MDynamic.ti\"]=\"class\\\"MDynamic\\\"abstract(){dynamicValues={}}\\\
+\\\"Invalid target '\\\"..tostring(ba)..\\\"' for class check\\\")end end\",\
+[\"MDynamic.ti\"]=\"class\\\"MDynamic\\\"abstract(){dynamicValues={}}\\\
 function MDynamic:setDynamicValue(a,b)\\\
 if\\\
 not Titanium.typeOf(a,\\\"DynamicValue\\\",true)then return\\\
@@ -1282,7 +1427,8 @@ function MDynamic:refreshDynamicValues(a)for b,c in\\\
 pairs(self.dynamicValues)do c:refresh()end\\\
 if not a and self.collatedNodes then\\\
 local b=self.collatedNodes;for i=1,#b do b[i]:refreshDynamicValues()end end end;function MDynamic:refreshDynamicValue(a)local b=self.dynamicValues[a]\\\
-if b then b:attach()end end\",[\"Thread.ti\"]=\"class\\\"Thread\\\"\\\
+if b then b:attach()end end\",\
+[\"Thread.ti\"]=\"class\\\"Thread\\\"\\\
 mixin\\\"MCallbackManager\\\"{running=false,func=false,co=false,filter=false,exception=false,crashSilently=false,titaniumEvents=false}\\\
 function Thread:__init__(...)self:resolve(...)self:start()end;function Thread:start()self.co=coroutine.create(self.func)\\\
 self.running=true;self.filter=false end;function Thread:stop()\\\
@@ -1301,7 +1447,8 @@ not self.crashSilently then\\\
 error(tostring(self)..\\\" coroutine exception: \\\"..tostring(aa))end end end\\\
 function Thread:setRunning(a)self.running=a;if not a then\\\
 self:executeCallbacks(\\\"finish\\\",self.exception)end end\\\
-configureConstructor{orderedArguments={\\\"func\\\",\\\"titaniumEvents\\\",\\\"crashSilently\\\",\\\"id\\\"},requiredArguments={\\\"func\\\"}}\",[\"Titanium.lua\"]=\"\\\
+configureConstructor{orderedArguments={\\\"func\\\",\\\"titaniumEvents\\\",\\\"crashSilently\\\",\\\"id\\\"},requiredArguments={\\\"func\\\"}}\",\
+[\"Titanium.lua\"]=\"\\\
 Event.static.matrix={mouse_click=MouseEvent,mouse_drag=MouseEvent,mouse_up=MouseEvent,mouse_scroll=MouseEvent,key=KeyEvent,key_up=KeyEvent,char=CharEvent}\\\
 Image.setImageParser(\\\"\\\",function(_d)local ad=TermCanvas.static.hex\\\
 width,lines,pixels=1,{},{}for bd in _d:gmatch\\\"([^\\\\n]*)\\\\n?\\\"do width=math.max(width,#bd)\\\
@@ -1446,7 +1593,8 @@ return cc.inBounce(_d*2,0,bd,cd)*0.5 +ad end\\\
 return\\\
 cc.outBounce(_d*2 -cd,0,bd,cd)*0.5 +bd*.5 +ad end).addEasing(\\\"outInBounce\\\",function(_d,ad,bd,cd)\\\
 if\\\
-_d<cd/2 then return cc.outBounce(_d*2,ad,bd/2,cd)end;return cc.inBounce((_d*2)-cd,ad+bd/2,bd/2,cd)end)\",[\"Class.lua\"]=\"local c_a,d_a,_aa,aaa={},{}\\\
+_d<cd/2 then return cc.outBounce(_d*2,ad,bd/2,cd)end;return cc.inBounce((_d*2)-cd,ad+bd/2,bd/2,cd)end)\",\
+[\"Class.lua\"]=\"local c_a,d_a,_aa,aaa={},{}\\\
 local baa={static=true,super=true,__type=true,isCompiled=true,compile=true}local caa\\\
 local daa=setmetatable({},{__index=function(_ab,aab)_ab[aab]=\\\"get\\\"..\\\
 aab:sub(1,1):upper()..aab:sub(2)return _ab[aab]end})\\\
@@ -1726,7 +1874,8 @@ do aab=d_b[i]for bab in _ab:gmatch(aab..\\\" ([_%a][_%w]*)%s\\\")do\\\
 _ab=_ab:gsub(aab..\\\" \\\"..bab,\\\
 aab..\\\" \\\\\\\"\\\"..bab..\\\"\\\\\\\"\\\")end end;for bab in _ab:gmatch(\\\"abstract class (\\\\\\\".[^%s]+\\\\\\\")\\\")do\\\
 _ab=_ab:gsub(\\\"abstract class \\\"..bab,\\\"class \\\"..\\\
-bab..\\\" abstract()\\\")end;return _ab end\",[\"Page.ti\"]=\"class\\\"Page\\\"extends\\\"ScrollContainer\\\"\\\
+bab..\\\" abstract()\\\")end;return _ab end\",\
+[\"Page.ti\"]=\"class\\\"Page\\\"extends\\\"ScrollContainer\\\"\\\
 function Page:setParent(a)\\\
 if\\\
 Titanium.typeOf(a,\\\"PageContainer\\\",true)then a:linkPage(self)elseif a then return\\\
@@ -1740,7 +1889,8 @@ if b then if a and b==a then\\\
 return-1 +b.X+self.X-b.scroll,-1 +b.Y+self.Y end\\\
 local d,_a=self.parent:getAbsolutePosition()return-1 +d+self.X-b.scroll-self.xScroll,-1 +_a+self.Y-\\\
 self.yScroll else return self.X,self.Y end end\\\
-configureConstructor{orderedArguments={\\\"id\\\"},argumentTypes={id=\\\"string\\\",position=\\\"number\\\"},requiredArguments={\\\"id\\\"}}\",[\"MTogglable.ti\"]=\"class\\\"MTogglable\\\"\\\
+configureConstructor{orderedArguments={\\\"id\\\"},argumentTypes={id=\\\"string\\\",position=\\\"number\\\"},requiredArguments={\\\"id\\\"}}\",\
+[\"MTogglable.ti\"]=\"class\\\"MTogglable\\\"\\\
 abstract(){toggled=false,toggledColour=colours.red,toggledBackgroundColour=colours.white}\\\
 function MTogglable:MTogglable()if Titanium.mixesIn(self,\\\"MThemeable\\\")then\\\
 self:register(\\\"toggled\\\",\\\"toggledColour\\\",\\\"toggledBackgroundColour\\\")end end;function MTogglable:toggle(...)\\\
@@ -1748,7 +1898,8 @@ self:setToggled(not self.toggled,...)end;function MTogglable:setToggled(a,...)\\
 if self.toggled~=a then\\\
 self.raw.toggled=a;self.changed=true;self:executeCallbacks(\\\"toggle\\\",...)end end\\\
 configureConstructor{argumentTypes={toggled=\\\"boolean\\\",toggledColour=\\\"colour\\\",toggledBackgroundColour=\\\"colour\\\"}}\\\
-alias{toggledColor=\\\"toggledColour\\\",toggledBackgroundColor=\\\"toggledBackgroundColour\\\"}\",[\"MInteractable.ti\"]=\"class\\\"MInteractable\\\"\\\
+alias{toggledColor=\\\"toggledColour\\\",toggledBackgroundColor=\\\"toggledBackgroundColour\\\"}\",\
+[\"MInteractable.ti\"]=\"class\\\"MInteractable\\\"\\\
 abstract(){static={properties={move={\\\"X\\\",\\\"Y\\\"},resize={\\\"width\\\",\\\"height\\\"},tabScroller={\\\"tabScroll\\\"}},callbacks={move={\\\"onPickup\\\",\\\"onDrop\\\"}}},mouse=false}\\\
 function MInteractable:updateMouse(a,b,c)\\\
 if not a and self.mouse then\\\
@@ -1757,7 +1908,8 @@ self.mouse=false else self.mouse={a,b,c}\\\
 local d=MInteractable.static.callbacks[a]if d then self:executeCallbacks(d[1],b,c)end end end\\\
 function MInteractable:handleMouseDrag(a,b,c)local d=self.mouse;if not d or b then return end\\\
 local _a=MInteractable.static.properties[d[1]]if not _a then return end;self[_a[1]]=a.X-d[2]+1;if _a[2]then self[_a[2]]=a.Y-\\\
-d[3]+1 end;a.handled=true end\",[\"Canvas.ti\"]=\"local d,_a=table.insert,table.remove\\\
+d[3]+1 end;a.handled=true end\",\
+[\"Canvas.ti\"]=\"local d,_a=table.insert,table.remove\\\
 local function aa(ba,ca,da,_b)\\\
 local ab=ba>ca and 1 -ca or 1;local bb=ca+da>_b and _b-ca or da;return ab,bb end;class\\\"Canvas\\\"\\\
 abstract(){static={shaders={}},buffer={},last={},width=51,height=19,backgroundColour=32768,colour=1,transparent=false}\\\
@@ -1826,7 +1978,8 @@ if not\\\
 error(\\\"Failed to register shader. Expected string, table; got \\\"..type(ba)..\\\", \\\"..\\\
 type(ca)..\\\"'\\\")elseif\\\
 Canvas.static.shaders[ba]then return\\\
-error(\\\"Failed to register shader '\\\"..tostring(ba)..\\\"'. Shader already registered\\\")end;Canvas.static.shaders[ba]=ca end\",[\"Window.ti\"]=\"class\\\"Window\\\"extends\\\"Container\\\"mixin\\\"MFocusable\\\"\\\
+error(\\\"Failed to register shader '\\\"..tostring(ba)..\\\"'. Shader already registered\\\")end;Canvas.static.shaders[ba]=ca end\",\
+[\"Window.ti\"]=\"class\\\"Window\\\"extends\\\"Container\\\"mixin\\\"MFocusable\\\"\\\
 mixin\\\"MInteractable\\\"{static={proxyMethods={\\\"addNode\\\",\\\"removeNode\\\",\\\"getNode\\\",\\\"query\\\",\\\"clearNodes\\\"},proxyProperties={\\\"marginLeft\\\",\\\"marginRight\\\",\\\"marginTop\\\",\\\"marginBottom\\\",\\\"fluidDimensions\\\",\\\"positioning\\\",\\\"minWidth\\\",\\\"minHeight\\\",\\\"maxWidth\\\",\\\"maxHeight\\\",\\\"positionChanged\\\"}},titleBar=true,titleBarColour=256,titleBarBackgroundColour=128,closeable=true,closeButtonChar=\\\"\\\\7\\\",closeButtonColour=16384,resizeable=true,resizeButtonChar=\\\"/\\\",resizeButtonColour=256,moveable=true,shadow=true,shadowColour=128,transparent=true,passiveFocus=true}\\\
 function Window:__init__(...)self:resolve(...)self:super()\\\
 self.titleBarContent=self:addNode(Container():set{id=\\\"titlebar\\\",width=\\\"$parent.width - ( parent.shadow and 1 or 0 )\\\",backgroundColour=\\\"$parent.titleBarBackgroundColour\\\",colour=\\\"$not parent.enabled and parent.disabledColour or parent.titleBarColour\\\",visible=\\\"$parent.titleBar\\\",enabled=\\\"$self.visible\\\",positioning=\\\"normal\\\"})\\\
@@ -1896,7 +2049,8 @@ self:updateHeight()end;function Window:setTitle(a)self.title=a\\\
 self:updateTitle()end\\\
 function Window:setShadow(a)self.shadow=a;self.changed=true end\\\
 function Window:setShadowColour(a)self.shadowColour=a;self.changed=true end\\\
-configureConstructor{argumentTypes={title=\\\"string\\\",titleBar=\\\"boolean\\\",titleBarColour=\\\"colour\\\",titleBarBackgroundColour=\\\"colour\\\",closeable=\\\"boolean\\\",closeButtonChar=\\\"string\\\",closeButtonColour=\\\"colour\\\",closeButtonBackgroundColour=\\\"colour\\\",resizeable=\\\"boolean\\\",resizeButtonChar=\\\"string\\\",resizeButtonColour=\\\"colour\\\",resizeButtonBackgroundColour=\\\"colour\\\",moveable=\\\"boolean\\\",shadow=\\\"boolean\\\",shadowColour=\\\"colour\\\"}}\",[\"EditableTextContainer.ti\"]=\"local b=string.sub;class\\\"EditableTextContainer\\\"\\\
+configureConstructor{argumentTypes={title=\\\"string\\\",titleBar=\\\"boolean\\\",titleBarColour=\\\"colour\\\",titleBarBackgroundColour=\\\"colour\\\",closeable=\\\"boolean\\\",closeButtonChar=\\\"string\\\",closeButtonColour=\\\"colour\\\",closeButtonBackgroundColour=\\\"colour\\\",resizeable=\\\"boolean\\\",resizeButtonChar=\\\"string\\\",resizeButtonColour=\\\"colour\\\",resizeButtonBackgroundColour=\\\"colour\\\",moveable=\\\"boolean\\\",shadow=\\\"boolean\\\",shadowColour=\\\"colour\\\"}}\",\
+[\"EditableTextContainer.ti\"]=\"local b=string.sub;class\\\"EditableTextContainer\\\"\\\
 extends\\\"TextContainer\\\"{allowKey=true,allowChar=true}\\\
 function EditableTextContainer:wrapText(c)self.super:wrapText(c-1)end\\\
 function EditableTextContainer:insertContent(c,d,_a)\\\
@@ -1947,7 +2101,8 @@ local c,d=self.cache.x-self.xScroll,self.cache.y-self.yScroll;if\\\
 c<0 or c>self.width or d<1 or d>self.height then return false end\\\
 local _a,aa=self:getAbsolutePosition()\\\
 return self.focused and not self.selection and true,c+_a-1,d+\\\
-aa-1,self.focusedColour or self.colour end\",[\"DynamicEqLexer.ti\"]=\"class\\\"DynamicEqLexer\\\"extends\\\"Lexer\\\"\\\
+aa-1,self.focusedColour or self.colour end\",\
+[\"DynamicEqLexer.ti\"]=\"class\\\"DynamicEqLexer\\\"extends\\\"Lexer\\\"\\\
 function DynamicEqLexer:lexNumber()\\\
 local a=self:trimStream()local b,c=a:match\\\"^%d*%.?%d+(e)([-+]?%d*)\\\"\\\
 if b and b~=\\\"\\\"then\\\
@@ -1973,7 +2128,8 @@ self:pushToken{type=\\\"OPERATOR\\\",value=self:consumePattern\\\"^[%+%-]\\\",am
 self:pushToken{type=\\\"PAREN\\\",value=self:consumePattern\\\"^[%(%)]\\\"}elseif a:find\\\"^%.\\\"then\\\
 self:pushToken{type=\\\"DOT\\\",value=self:consumePattern\\\"^%.\\\"}elseif a:find\\\"^%w+\\\"then\\\
 self:pushToken{type=\\\"NAME\\\",value=self:consumePattern\\\"^%w+\\\"}else\\\
-self:throw(\\\"Unexpected block '\\\".. (a:match(\\\"%S+\\\")or\\\"\\\")..\\\"'\\\")end end end\",[\"Parser.ti\"]=\"class\\\"Parser\\\"abstract(){position=0,tokens={}}\\\
+self:throw(\\\"Unexpected block '\\\".. (a:match(\\\"%S+\\\")or\\\"\\\")..\\\"'\\\")end end end\",\
+[\"Parser.ti\"]=\"class\\\"Parser\\\"abstract(){position=0,tokens={}}\\\
 function Parser:__init__(a)\\\
 if\\\
 type(a)~=\\\"table\\\"then return error\\\"Failed to parse. Invalid tokens\\\"end;self.tokens=a;self:parse()end\\\
@@ -1994,7 +2150,8 @@ return error(\\\"Parser (\\\"..tostring(self.__type)..\\\
 \\\") Error: \\\"..a,2)end;return\\\
 error(\\\"Parser (\\\"..tostring(self.__type)..\\\
 \\\
-\\\") Error. Line \\\"..c.line..\\\", char \\\"..c.char..\\\": \\\"..a,2)end\",[\"OverlayContainer.ti\"]=\"class\\\"OverlayContainer\\\"\\\
+\\\") Error. Line \\\"..c.line..\\\", char \\\"..c.char..\\\": \\\"..a,2)end\",\
+[\"OverlayContainer.ti\"]=\"class\\\"OverlayContainer\\\"\\\
 extends\\\"Container\\\"{shader=\\\"greyscale\\\",backgroundColour=1}\\\
 function OverlayContainer:__init__(...)self:resolve(...)self:super()\\\
 self.transparent=true;self.canvas.onlyShadeBottom=true end;function OverlayContainer:__postInit__()self.super:__postInit__()\\\
@@ -2005,7 +2162,8 @@ if a.main==\\\"MOUSE\\\"then\\\
 b=a:clone(self)b.isWithin=a:withinParent(self)end;self:shipEvent(b or a)\\\
 if b and b.isWithin and\\\
 (self.consumeAll or b.handled)then if not b.handled then\\\
-self:executeCallbacks\\\"miss\\\"end;a.handled=true end;return true end\",[\"Component.ti\"]=\"class\\\"Component\\\"abstract()\\\
+self:executeCallbacks\\\"miss\\\"end;a.handled=true end;return true end\",\
+[\"Component.ti\"]=\"class\\\"Component\\\"abstract()\\\
 mixin\\\"MPropertyManager\\\"{width=1,height=1,X=1,Y=1,changed=true,backgroundChar=\\\" \\\",shader=false,shadeText=true,shadeBackground=true,marginLeft=0,marginRight=0,marginTop=0,marginBottom=0,positioning=false}\\\
 function Component:__init__()local a,b,c=self.shadeText,self.shadeBackground,self.shader\\\
 self.shadeText=\\\
@@ -2037,7 +2195,8 @@ self.changed=true end\\\
 function Component:setBackgroundTextColour(a)\\\
 self.backgroundTextColour=a;self.canvas.backgroundTextColour=a;self.changed=true end\\\
 configureConstructor{orderedArguments={\\\"X\\\",\\\"Y\\\",\\\"width\\\",\\\"height\\\"},argumentTypes={X=\\\"number\\\",Y=\\\"number\\\",width=\\\"number\\\",height=\\\"number\\\",colour=\\\"colour\\\",backgroundColour=\\\"colour\\\",backgroundTextColour=\\\"colour\\\",transparent=\\\"boolean\\\",shader=\\\"ANY\\\",shadeText=\\\"ANY\\\",shadeBackground=\\\"ANY\\\",marginLeft=\\\"number\\\",marginRight=\\\"number\\\",marginTop=\\\"number\\\",marginBottom=\\\"number\\\",positioning=\\\"ANY\\\"}}\\\
-alias{color=\\\"colour\\\",backgroundColor=\\\"backgroundColour\\\"}\",[\"MouseEvent.ti\"]=\"local c,d=string.sub,string.upper;class\\\"MouseEvent\\\"\\\
+alias{color=\\\"colour\\\",backgroundColor=\\\"backgroundColour\\\"}\",\
+[\"MouseEvent.ti\"]=\"local c,d=string.sub,string.upper;class\\\"MouseEvent\\\"\\\
 extends\\\"Event\\\"{main=\\\"MOUSE\\\",isWithin=true}\\\
 function MouseEvent:__init__(_a,aa,ba,ca,da)self.name=_a;self.button=aa;self.X=ba;self.Y=ca;self.sub=da or\\\
 d(c(_a,7))self.data={_a,aa,ba,ca}end;function MouseEvent:within(_a,aa,ba,ca)local da,_b=self.X,self.Y\\\
@@ -2048,7 +2207,8 @@ self.isWithin and self:within(_a.X,_a.Y,_a.width,_a.height)end\\\
 function MouseEvent:clone(_a)\\\
 local aa=MouseEvent(self.name,self.button,\\\
 self.X-_a.X+1,self.Y-_a.Y+1,self.sub)aa.handled=self.handled;aa.isWithin=self.isWithin;aa.setHandled=function(ba,ca)ba.handled=ca\\\
-self.handled=ca end;return aa end\",[\"Tween.ti\"]=\"\\\
+self.handled=ca end;return aa end\",\
+[\"Tween.ti\"]=\"\\\
 class\\\"Tween\\\"{static={easing={}},object=false,property=false,initial=false,final=false,duration=0,clock=0}\\\
 function Tween:__init__(...)self:resolve(...)\\\
 if\\\
@@ -2070,7 +2230,8 @@ self.clock=0 elseif a>=self.duration then self.clock=self.duration else self.clo
 function Tween.static.addEasing(a,b)if type(b)~=\\\"function\\\"then\\\
 return error\\\"Easing function must be of type 'function'\\\"end\\\
 Tween.static.easing[a]=b;return Tween end\\\
-configureConstructor{orderedArguments={\\\"object\\\",\\\"name\\\",\\\"property\\\",\\\"final\\\",\\\"duration\\\",\\\"easing\\\",\\\"promise\\\"},requiredArguments={\\\"object\\\",\\\"name\\\",\\\"property\\\",\\\"final\\\",\\\"duration\\\"},argumentTypes={name=\\\"string\\\",property=\\\"string\\\",final=\\\"number\\\",duration=\\\"number\\\",promise=\\\"function\\\"}}\",[\"Button.ti\"]=\"class\\\"Button\\\"extends\\\"Node\\\"mixin\\\"MTextDisplay\\\"\\\
+configureConstructor{orderedArguments={\\\"object\\\",\\\"name\\\",\\\"property\\\",\\\"final\\\",\\\"duration\\\",\\\"easing\\\",\\\"promise\\\"},requiredArguments={\\\"object\\\",\\\"name\\\",\\\"property\\\",\\\"final\\\",\\\"duration\\\"},argumentTypes={name=\\\"string\\\",property=\\\"string\\\",final=\\\"number\\\",duration=\\\"number\\\",promise=\\\"function\\\"}}\",\
+[\"Button.ti\"]=\"class\\\"Button\\\"extends\\\"Node\\\"mixin\\\"MTextDisplay\\\"\\\
 mixin\\\"MActivatable\\\"{allowMouse=true,buttonLock=1}function Button:__init__(...)self:resolve(...)self:super()\\\
 self:register(\\\"width\\\",\\\"height\\\",\\\"buttonLock\\\")end;function Button:onMouseClick(a,b,c)\\\
 if\\\
@@ -2085,7 +2246,8 @@ if not self.enabled then\\\
 d,c=b.disabledBackgroundColour,b.disabledColour elseif self.active then d,c=b.activeBackgroundColour,b.activeColour end;b.canvas:clear(d)self:drawText(d,c)b.changed=false end end;function Button:setText(a)if self.text==a then return end;self.text=a;self.changed=true\\\
 self:wrapText()end;function Button:setWidth(a)\\\
 self.super:setWidth(a)self:wrapText()end\\\
-configureConstructor{orderedArguments={\\\"text\\\"},requiredArguments={\\\"text\\\"},argumentTypes={buttonLock=\\\"number\\\"}}\",[\"ContextMenu.ti\"]=\"class\\\"ContextMenu\\\"\\\
+configureConstructor{orderedArguments={\\\"text\\\"},requiredArguments={\\\"text\\\"},argumentTypes={buttonLock=\\\"number\\\"}}\",\
+[\"ContextMenu.ti\"]=\"class\\\"ContextMenu\\\"\\\
 extends\\\"Container\\\"{static={allowedTypes={\\\"Button\\\",\\\"Label\\\"}}}function ContextMenu:__init__(...)self:resolve(...)self:super()\\\
 self.transparent=true end\\\
 function ContextMenu:setParent(a)self.parent=a;if\\\
@@ -2129,7 +2291,8 @@ function ContextMenu:closeFrame(a)local b,c={self.nodes[a]},1;while c<=#b do\\\
 local d=b[c].subframes or{}for f=1,#d do if d[f].visible then b[#b+1]=d[f]end end\\\
 b[c].visible=false;c=c+1 end\\\
 self.changed=true end\\\
-configureConstructor{orderedArguments={\\\"structure\\\"},requiredArguments={\\\"structure\\\"},argumentTypes={structure=\\\"table\\\"}}\",[\"XMLLexer.ti\"]=\"class\\\"XMLLexer\\\"\\\
+configureConstructor{orderedArguments={\\\"structure\\\"},requiredArguments={\\\"structure\\\"},argumentTypes={structure=\\\"table\\\"}}\",\
+[\"XMLLexer.ti\"]=\"class\\\"XMLLexer\\\"\\\
 extends\\\"Lexer\\\"{openTag=false,definingAttribute=false,currentAttribute=false}\\\
 function XMLLexer:consumeComment()local a=self.stream;local b=a:find(\\\"%-%-%>\\\",4)if b then\\\
 self.stream=a:sub(b+3)else self.stream=\\\"\\\"end end\\\
@@ -2149,7 +2312,8 @@ return elseif _a==\\\"'\\\"or _a==\\\"\\\\\\\"\\\"then\\\
 self:pushToken({type=d and\\\"XML_STRING_ATTRIBUTE_VALUE\\\"or\\\"XML_STRING\\\",value=self:consumeString(_a)})elseif _a==\\\">\\\"then self:pushToken({type=\\\"XML_CLOSE\\\"})\\\
 self.openTag=false;self:consume(1)else\\\
 self:throw(\\\"Unexpected block '\\\"..a:match(\\\"(.-)%s\\\")..\\\"'\\\")end;if self.currentAttribute then self.currentAttribute=false end;if\\\
-self.definingAttribute then self.definingAttribute=false end end\",[\"MPropertyManager.ti\"]=\"class\\\"MPropertyManager\\\"abstract()\\\
+self.definingAttribute then self.definingAttribute=false end end\",\
+[\"MPropertyManager.ti\"]=\"class\\\"MPropertyManager\\\"abstract()\\\
 mixin\\\"MDynamic\\\"{watching={},foreignWatchers={},links={}}\\\
 function MPropertyManager:MPropertyManager()\\\
 local a=Titanium.getClass(self.__type):getRegistry().constructor;if not(a or a.argumentTypes)then return end\\\
@@ -2210,7 +2374,8 @@ function MPropertyManager:unlinkProperties(a,...)local b,c,d={...},self.links,se
 for i=1,#b do\\\
 local _a=b[i]\\\
 if not self:removeDynamicValue(_a)then\\\
-self:unwatchForeignProperty(_a,a,\\\"PROPERTY_LINK_\\\"..self.__ID)if c[_a]==a then c[_a]=nil end end end;return self end\",[\"XMLParser.ti\"]=\"class\\\"XMLParser\\\"\\\
+self:unwatchForeignProperty(_a,a,\\\"PROPERTY_LINK_\\\"..self.__ID)if c[_a]==a then c[_a]=nil end end end;return self end\",\
+[\"XMLParser.ti\"]=\"class\\\"XMLParser\\\"\\\
 extends\\\"Parser\\\"{tokens=false,tree=false}\\\
 function XMLParser:__init__(a)local b=XMLLexer(a)self:super(b.tokens)end\\\
 function XMLParser:parse()local a,b,c={{}},false,self:stepForward()local d,_a\\\
@@ -2256,7 +2421,8 @@ if a==\\\"transparent\\\"or a==\\\"trans\\\"then return 0 end\\\
 return tonumber(a)or colours[a]or colors[a]or\\\
 error(\\\
 \\\"Failed to cast argument to colour (number). Value: \\\"..tostring(a)..\\\" is not a valid colour\\\")else return\\\
-error(\\\"Failed to cast argument. Unknown target type '\\\"..tostring(b)..\\\"'\\\")end end\",[\"Slider.ti\"]=\"class\\\"Slider\\\"\\\
+error(\\\"Failed to cast argument. Unknown target type '\\\"..tostring(b)..\\\"'\\\")end end\",\
+[\"Slider.ti\"]=\"class\\\"Slider\\\"\\\
 extends\\\"Container\\\"{trackCharacter=_CC_SPECIAL_CHAR_SUPPORT and\\\"\\\\140\\\"or\\\"-\\\",trackColour=128,slideCharacter=\\\" \\\",slideBackgroundColour=colours.cyan,value=1}\\\
 function Slider:__init__(...)self:super(...)\\\
 self:register(\\\"value\\\",\\\"trackCharacter\\\",\\\"trackColour\\\",\\\"slideCharacter\\\",\\\"slideBackgroundColour\\\")\\\
@@ -2271,7 +2437,9 @@ self.super:setWidth(a)\\\
 self.track.text=self.trackCharacter:rep(self.width)end\\\
 function Slider:setTrackCharacter(a)\\\
 self.trackCharacter=a;self.track.text=a:rep(self.width)end\\\
-configureConstructor{argumentTypes={trackCharacter=\\\"string\\\",trackColour=\\\"colour\\\",slideCharacter=\\\"string\\\",slideBackgroundColour=\\\"colour\\\",value=\\\"number\\\"}}\",[\"versionCheck.lua\"]=\"if _HOST then _CC_SPECIAL_CHAR_SUPPORT=true end\",[\"TextContainer.ti\"]=\"local c=string.sub\\\
+configureConstructor{argumentTypes={trackCharacter=\\\"string\\\",trackColour=\\\"colour\\\",slideCharacter=\\\"string\\\",slideBackgroundColour=\\\"colour\\\",value=\\\"number\\\"}}\",\
+[\"versionCheck.lua\"]=\"if _HOST then _CC_SPECIAL_CHAR_SUPPORT=true end\",\
+[\"TextContainer.ti\"]=\"local c=string.sub\\\
 local function d(_a,aa,ba,ca)local da=math.min(#aa,ca)if da==0 then return 0 end\\\
 local _b=aa[da]return\\\
 math.min(_b[3]- (da==#aa and 0 or 1),_b[2]+ba-_b[5])end;class\\\"TextContainer\\\"extends\\\"ScrollContainer\\\"mixin\\\"MTextDisplay\\\"\\\
@@ -2349,7 +2517,8 @@ function TextContainer:setWidth(_a)self.super.super:setWidth(_a)\\\
 self:wrapText(_a)self:cacheContent()local aa=self.cache\\\
 self.xScroll=math.max(0,math.min(aa.contentWidth-\\\
 aa.displayWidth,self.xScroll))end\\\
-configureConstructor({orderedArguments={\\\"text\\\",\\\"X\\\",\\\"Y\\\",\\\"width\\\",\\\"height\\\"},argumentTypes={text=\\\"string\\\"}},true)\",[\"Container.ti\"]=\"class\\\"Container\\\"extends\\\"Node\\\"\\\
+configureConstructor({orderedArguments={\\\"text\\\",\\\"X\\\",\\\"Y\\\",\\\"width\\\",\\\"height\\\"},argumentTypes={text=\\\"string\\\"}},true)\",\
+[\"Container.ti\"]=\"class\\\"Container\\\"extends\\\"Node\\\"\\\
 mixin\\\"MNodeContainer\\\"{allowMouse=true,allowKey=true,allowChar=true,consumeAll=true}\\\
 function Container:__init__(...)self:resolve(...)local a=self.nodes;self.nodes={}\\\
 if\\\
@@ -2382,7 +2551,8 @@ function Container:setWidth(a)\\\
 self.super:setWidth(a)local b=self.nodes;for i=1,#b do b[i].needsRedraw=true end end\\\
 function Container:setHeight(a)self.super:setHeight(a)local b=self.nodes;for i=1,#b do\\\
 b[i].needsRedraw=true end end\\\
-configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\",\\\"width\\\",\\\"height\\\",\\\"nodes\\\",\\\"backgroundColour\\\"},argumentTypes={nodes=\\\"table\\\",consumeAll=\\\"boolean\\\"}},true)\",[\"TermCanvas.ti\"]=\"local c=table.concat;local d={}for i=0,15 do d[2 ^i]=(\\\"%x\\\"):format(i)d[(\\\"%x\\\"):format(i)]=\\\
+configureConstructor({orderedArguments={\\\"X\\\",\\\"Y\\\",\\\"width\\\",\\\"height\\\",\\\"nodes\\\",\\\"backgroundColour\\\"},argumentTypes={nodes=\\\"table\\\",consumeAll=\\\"boolean\\\"}},true)\",\
+[\"TermCanvas.ti\"]=\"local c=table.concat;local d={}for i=0,15 do d[2 ^i]=(\\\"%x\\\"):format(i)d[(\\\"%x\\\"):format(i)]=\\\
 2 ^i end;class\\\"TermCanvas\\\"\\\
 extends\\\"Canvas\\\"{static={hex=d}}\\\
 function TermCanvas:draw(_a,aa,ba,ca)local da=self.owner;local _b,ab=self.buffer,self.last\\\
@@ -2408,7 +2578,8 @@ aaa and(\\\
 type(baa)==\\\"number\\\"and baa~=0 and baa or ac or 1)or cc or 1]\\\
 d_a[x]=d[\\\
 type(caa)==\\\"number\\\"and caa~=0 and caa or dc or 32768]end;b_a[x]=aaa or bc or\\\" \\\"cd=cd+1 end;term.setCursorPos(bb,y+cb)\\\
-term.blit(c(b_a),c(c_a),c(d_a))end end end\",[\"Image.ti\"]=\"local function b(c)return c:match\\\".+%.(.-)$\\\"or\\\"\\\"end\\\
+term.blit(c(b_a),c(c_a),c(d_a))end end end\",\
+[\"Image.ti\"]=\"local function b(c)return c:match\\\".+%.(.-)$\\\"or\\\"\\\"end\\\
 class\\\"Image\\\"\\\
 extends\\\"Node\\\"{static={imageParsers={}},path=false}\\\
 function Image:__init__(...)self:super()self:resolve(...)end\\\
@@ -2430,7 +2601,8 @@ function Image.static.setImageParser(c,d)if\\\
 type(c)~=\\\"string\\\"or type(d)~=\\\"function\\\"then\\\
 return error\\\"Failed to set image parser. Invalid arguments, expected string, function\\\"end\\\
 Image.static.imageParsers[c]=d;return Image end\\\
-configureConstructor{orderedArguments={\\\"path\\\"},requiredArguments={\\\"path\\\"},useProxy={\\\"path\\\"},argumentTypes={path=\\\"string\\\"}}\",[\"RedirectCanvas.ti\"]=\"local _a,aa=string.len,string.sub;local ba=term.isColour()local function ca(da)if\\\
+configureConstructor{orderedArguments={\\\"path\\\"},requiredArguments={\\\"path\\\"},useProxy={\\\"path\\\"},argumentTypes={path=\\\"string\\\"}}\",\
+[\"RedirectCanvas.ti\"]=\"local _a,aa=string.len,string.sub;local ba=term.isColour()local function ca(da)if\\\
 not ba and(da~=1 or\\\
 da~=32768 or da~=256 or da~=128)then error\\\"Colour not supported\\\"end;return\\\
 true end\\\
@@ -2467,7 +2639,8 @@ da.setBackgroundColor=da.setBackgroundColour;da.setTextColor=da.setTextColour\\\
 da.getBackgroundColor=da.getBackgroundColour;da.getTextColor=da.getTextColour;return da end\\\
 function RedirectCanvas:clear(da,_b)local ab=da or self.tBackgroundColour\\\
 local bb,cb={\\\" \\\",ab,ab},self.buffer;for index=1,self.width*self.height do\\\
-if not cb[index]or _b then cb[index]=bb end end end\",[\"TabContainer.ti\"]=\"class\\\"TabContainer\\\"extends\\\"Container\\\"mixin\\\"MInteractable\\\"\\\
+if not cb[index]or _b then cb[index]=bb end end end\",\
+[\"TabContainer.ti\"]=\"class\\\"TabContainer\\\"extends\\\"Container\\\"mixin\\\"MInteractable\\\"\\\
 function TabContainer:__postInit__(...)\\\
 self.super:__postInit__(...)self.height=\\\"$parent.tabHeight or 1\\\"\\\
 self.backgroundColour=\\\"$parent.tabBackgroundColour\\\"end;function TabContainer:onMouseClick(a,b,c)if b or not c then return end\\\
@@ -2481,7 +2654,8 @@ self.parent:moveTabs(a.button*5,true)end;function TabContainer:onMouseDrag(a,b,c
 self.mouse then return end;self:handleMouseDrag(a,b,c)\\\
 self.dragged=true end\\\
 function TabContainer:setTabScroll(a)\\\
-self.tabScroll=a;self.parent:moveTabs(false,true,-a)end\",[\"ScrollContainer.ti\"]=\"class\\\"ScrollContainer\\\"\\\
+self.tabScroll=a;self.parent:moveTabs(false,true,-a)end\",\
+[\"ScrollContainer.ti\"]=\"class\\\"ScrollContainer\\\"\\\
 extends\\\"Container\\\"{cache={},xScroll=0,yScroll=0,xScrollAllowed=true,yScrollAllowed=true,propagateMouse=true,trayColour=256,scrollbarColour=128,activeScrollbarColour=colours.cyan,mouse={selected=false,origin=false}}\\\
 function ScrollContainer:__init__(...)\\\
 self:register(\\\"scrollbarColour\\\",\\\"activeScrollbarColour\\\",\\\"trayColour\\\")self:super(...)end\\\
@@ -2588,7 +2762,8 @@ a.xScrollPosition,a.yScrollPosition=math.ceil(self.xScroll/\\\
 a.contentWidth*a.displayWidth+.5),math.ceil(\\\
 self.yScroll/a.contentHeight*a.displayHeight+.5)self.changed=true\\\
 self:redrawArea(1,1,self.width,self.height)end\\\
-configureConstructor{argumentTypes={scrollbarColour=\\\"colour\\\",activeScrollbarColour=\\\"colour\\\",xScrollAllowed=\\\"boolean\\\",yScrollAllowed=\\\"boolean\\\"}}\",[\"Lexer.ti\"]=\"class\\\"Lexer\\\"\\\
+configureConstructor{argumentTypes={scrollbarColour=\\\"colour\\\",activeScrollbarColour=\\\"colour\\\",xScrollAllowed=\\\"boolean\\\",yScrollAllowed=\\\"boolean\\\"}}\",\
+[\"Lexer.ti\"]=\"class\\\"Lexer\\\"\\\
 abstract(){static={escapeChars={a=\\\"\\\\a\\\",b=\\\"\\\\b\\\",f=\\\"\\\\f\\\",n=\\\"\\\\n\\\",r=\\\"\\\\r\\\",t=\\\"\\\\t\\\",v=\\\"\\\\v\\\"}},stream=false,tokens={},line=1,char=1}\\\
 function Lexer:__init__(a,b)\\\
 if type(a)~=\\\"string\\\"then return\\\
@@ -2615,7 +2790,8 @@ function Lexer:newline(a)self.line=self.line+ (a or 1)self.char=0 end\\\
 function Lexer:throw(a)\\\
 self.exception=\\\"Lexer (\\\"..tostring(self.__type)..\\\
 \\\") Exception at line '\\\"..self.line..\\\"', char '\\\"..self.char..\\\
-\\\"': \\\"..a;return error(self.exception)end\",[\"NodeCanvas.ti\"]=\"local b=string.sub;class\\\"NodeCanvas\\\"extends\\\"Canvas\\\"\\\
+\\\"': \\\"..a;return error(self.exception)end\",\
+[\"NodeCanvas.ti\"]=\"local b=string.sub;class\\\"NodeCanvas\\\"extends\\\"Canvas\\\"\\\
 function NodeCanvas:drawPoint(c,d,_a,aa,ba)\\\
 if\\\
 #_a>1 then return error\\\"drawPoint can only draw one character\\\"end\\\
@@ -2627,7 +2803,8 @@ _b[-1 +ab+i]={b(_a,i,i),ca,da}end end\\\
 function NodeCanvas:drawBox(c,d,_a,aa,ba,ca,da)\\\
 local _b,ab=da or self.colour,ba or self.backgroundColour;local bb=self.buffer;local cb={ca or\\\" \\\",_b,ab}for y=math.max(0,d),d+aa-1 do\\\
 for x=math.max(1,c),\\\
-c+_a-1 do bb[(self.width* (y-1))+x]=cb end end end\",[\"Label.ti\"]=\"class\\\"Label\\\"extends\\\"Node\\\"\\\
+c+_a-1 do bb[(self.width* (y-1))+x]=cb end end end\",\
+[\"Label.ti\"]=\"class\\\"Label\\\"extends\\\"Node\\\"\\\
 mixin\\\"MTextDisplay\\\"{labelFor=false,allowMouse=true,active=false}\\\
 function Label:__init__(...)self:resolve(...)self.raw.width=#self.text\\\
 self:super()self:register\\\"text\\\"\\\
@@ -2639,7 +2816,8 @@ local d=self.application:getNode(self.labelFor,true)if self.active and not b and
 d:onLabelClicked(self,a,b,c)end;self.active=false end\\\
 function Label:draw(a)local b=self.raw;if b.changed or a then\\\
 b.canvas:drawTextLine(1,1,b.text)b.changed=false end end\\\
-configureConstructor({orderedArguments={\\\"text\\\",\\\"X\\\",\\\"Y\\\"},requiredArguments={\\\"text\\\"},argumentTypes={text=\\\"string\\\"}},true)\",[\"MFocusable.ti\"]=\"class\\\"MFocusable\\\"\\\
+configureConstructor({orderedArguments={\\\"text\\\",\\\"X\\\",\\\"Y\\\"},requiredArguments={\\\"text\\\"},argumentTypes={text=\\\"string\\\"}},true)\",\
+[\"MFocusable.ti\"]=\"class\\\"MFocusable\\\"\\\
 abstract(){focused=false,passiveFocus=false}\\\
 function MFocusable:MFocusable()if Titanium.mixesIn(self,\\\"MThemeable\\\")then\\\
 self:register(\\\"focused\\\",\\\"focusedColour\\\",\\\"focusedBackgroundColour\\\")end end\\\
@@ -2653,70 +2831,224 @@ self.application and not self.passiveFocus then self.application:focusNode(self)
 function MFocusable:unfocus()if self.application and not self.passiveFocus then\\\
 self.application:unfocusNode(self)end;self.focused=false end\\\
 configureConstructor{argumentTypes={focusedBackgroundColour=\\\"colour\\\",focusedColour=\\\"colour\\\",focused=\\\"boolean\\\"}}\\\
-alias{focusedColor=\\\"focusedColour\\\",focusedBackgroundColor=\\\"focusedBackgroundColour\\\"}\"}\
-local ba={[\"versionCheck.lua\"]=true,[\"Titanium.lua\"]=true,[\"Class.lua\"]=true}local ca={[1]=\"versionCheck.lua\"}local da={}\
-local function _b(ab,bb)if da[ab]then return end\
-local cb=aa[ab]\
-if cb then local db,_c=loadstring(cb,ab)\
-if not db or _c then return\
-error(\"Failed to load Lua chunk. File '\"..ab..\"' has a syntax error: \"..\
-tostring(_c),0)end;local ac,bc=pcall(db)\
-if not ac or bc then return\
-error(\"Failed to execute Lua chunk. File '\"..ab..\
-\"' crashed: \"..tostring(bc),0)end\
-if bb then local cc=ab:gsub(\"%..*\",\"\")local dc=Titanium.getClass(cc)\
-if dc then if not\
-dc:isCompiled()then dc:compile()end else return\
-error(\"File '\"..ab..\"' failed to create class '\"..\
-cc..\"'\")end end;da[ab]=true else return\
-error(\"Failed to load Titanium. File '\"..tostring(ab)..\"' cannot be found.\")end end;_b(\"Class.lua\")\
-Titanium.setClassLoader(function(ab)local bb=ab..\".ti\"\
-if not aa[bb]then return\
-error(\
-\"Failed to find file '\"..bb..\", to load missing class '\"..ab..\"'.\",3)else _b(bb,true)end end)for i=1,#ca do _b(ca[i],not ba[ca[i]])end;for ab in\
-pairs(aa)do if not ba[ab]then _b(ab,true)end end;for ab in\
-pairs(ba)do _b(ab,false)end",["Hyper/Lua/Hyper.lua"]="\
-local ba=Application():set({terminatable=true,color=colors.black,backgroundColor=colors.white})ba:importFromTML(\"Hyper/UI/TML/Hyper.tml\")\
-ba:addTheme(Theme.fromFile(\"Hyper\",\"Hyper/UI/Themes/Hyper.theme\"))local function ca(cb)return ba:query(cb).result[1]end\
-local da={self=ca\"#Topbar\",menuButton=ca\"#TopbarMenuButton\",clock=ca\"#TopbarClock\",searchButton=ca\"#TopbarSearchButton\",sidebarButton=ca\"#TopbarSidebarButton\",dragStartedOn=false}local _b={container=ca\"#AppListContainer\"}\
-local ab={self=ca\"#Sidebar\",tabContainer=ca\"#SidebarTabContainer\",Notifications={self=ca\"#SidebarNotifications\",list=ca\"#SidebarNotificationsList\"},isOpen=false}\
-local bb={self=ca\"#Dialog\",label=ca\"#DialogLabel\",rightButton=ca\"#DialogButtonRight\",leftButton=ca\"#DialogButtonLeft\"}\
-function ab:toggle()\
-if ab.isOpen then\
-ab.self:animate(\"showSidebar\",\"X\",ba.width+1,0.3,\"inCubic\")else\
-ab.self:animate(\"hideSidebar\",\"X\",ba.width-ab.self.width+1,0.3,\"outCubic\")end;ab.isOpen=not ab.isOpen end\
-function bb:create(cb,db,_c,ac,bc)bb.label:setText(cb)\
-bb.rightButton:setText(db and db or\"\")\
-bb.rightButton:off(\"trigger\"):on(\"trigger\",function()bb.self:animate(\"dialog\",\"Y\",\
-ba.height+1,0.3,\"inCubic\")\
-if ac then ac()end end)bb.leftButton:setText(_c and _c or\"\")\
-bb.leftButton:off(\"trigger\"):on(\"trigger\",function()bb.self:animate(\"dialog\",\"Y\",\
-ba.height+1,0.3,\"inCubic\")\
-if bc then bc()end end)\
-bb.self:animate(\"dialog\",\"Y\",(ba.height-bb.self.height)/2,0.3,\"outCubic\")end\
-ab.tabContainer:set({tabColour=colors.black,tabBackgroundColour=colors.lightGray,selectedTabColour=colors.white,selectedTabBackgroundColour=colors.lightBlue})\
-da.menuButton:on(\"trigger\",function()\
-if da.Menu then ba:removeNode(da.Menu)end\
-da.Menu=ba:addNode(ContextMenu({{\"button\",\" About Hyper \",function()ba:removeNode(da.Menu)bb.create(nil,\"Hyper\\n\"..\
-_HOST,\"OK\")end},{\"rule\"},{\"button\",\" Settings \",function()\
-end},{\"rule\"},{\"menu\",\" Leave...   \\16 \",{{\"button\",\" Logout \",function()\
-ba:removeNode(da.Menu)\
-bb:create(\"Log out?\",\"Yes\",\"No\",function()ba:stop()end)end},{\"button\",\" Reboot \",function()\
-ba:removeNode(da.Menu)bb:create(\"Reboot?\",\"Yes\",\"No\",os.reboot)end},{\"button\",\" Shutdown \",function()\
-ba:removeNode(da.Menu)bb:create(\"Shut down?\",\"Yes\",\"No\",os.shutdown)end}}}},2,\
-da.self.Y+1))end)da.sidebarButton:on(\"trigger\",ab.toggle)\
-da.searchButton:on(\"trigger\",function()\
-da.self:animate(\"topbar\",\"Y\",10,0.3,\"outCubic\")end)\
-ab.tabContainer:selectPage(\"SidebarNotifications\")\
-ba:on(\"mouse_click\",function(cb,db)\
-if db.button==1 then\
-if db.Y==da.self.Y then da.dragStartedOn=true end\
-if\
-db.X<ab.self.X and ab.isOpen and not da.dragStartedOn then ab:toggle()db.handled=true end end end):on(\"mouse_drag\",function(cb,db)if\
-db.button==1 then\
-if da.dragStartedOn then da.self.Y=db.Y;db.handled=true end end end):on(\"mouse_up\",function()\
-da.dragStartedOn=false end)\
-ba:schedule(function()da.clock:update()end,0.5,true)ba:start()",["Hyper/UI/Themes/Hyper.theme"]="<!-- Hyper Theme -->\
+alias{focusedColor=\\\"focusedColour\\\",focusedBackgroundColor=\\\"focusedBackgroundColour\\\"}\",\
+}\
+local scriptFiles = {\
+[\"versionCheck.lua\"]=true,\
+[\"Titanium.lua\"]=true,\
+[\"Class.lua\"]=true,\
+}\
+local preLoad = {\
+[1]=\"versionCheck.lua\",\
+}\
+local loaded = {}\
+local function loadFile( name, verify )\
+    if loaded[ name ] then return end\
+\
+    local content = files[ name ]\
+    if content then\
+        local output, err = loadstring( content, name )\
+        if not output or err then return error( \"Failed to load Lua chunk. File '\"..name..\"' has a syntax error: \"..tostring( err ), 0 ) end\
+\
+        local ok, err = pcall( output )\
+        if not ok or err then return error( \"Failed to execute Lua chunk. File '\"..name..\"' crashed: \"..tostring( err ), 0 ) end\
+\
+        if verify then\
+            local className = name:gsub( \"%..*\", \"\" )\
+            local class = Titanium.getClass( className )\
+\
+            if class then\
+                if not class:isCompiled() then class:compile() end\
+            else return error( \"File '\"..name..\"' failed to create class '\"..className..\"'\" ) end\
+        end\
+\
+        loaded[ name ] = true\
+    else return error(\"Failed to load Titanium. File '\"..tostring( name )..\"' cannot be found.\") end\
+end\
+\
+-- Load our class file\
+loadFile( \"Class.lua\" )\
+\
+Titanium.setClassLoader(function( name )\
+    local fName = name..\".ti\"\
+\
+    if not files[ fName ] then\
+        return error(\"Failed to find file '\"..fName..\", to load missing class '\"..name..\"'.\", 3)\
+    else\
+        loadFile( fName, true )\
+    end\
+end)\
+\
+-- Load any files specified by our config file\
+for i = 1, #preLoad do loadFile( preLoad[ i ], not scriptFiles[ preLoad[ i ] ] ) end\
+\
+-- Load all class files\
+for name in pairs( files ) do if not scriptFiles[ name ] then\
+    loadFile( name, true )\
+end end\
+\
+-- Load all script files\
+for name in pairs( scriptFiles ) do loadFile( name, false ) end",
+  [ "Hyper/Lua/Hyper.lua" ] = "--[[\
+\009Hyper, the easy-to-use ComputerCraft OS.\
+\009Evolution of the original EmilOS.\
+\009(c) 2018 Emil Inc.\
+\
+\009Titanium is (c) 2016 Harry Felton.\
+]]\
+\
+-- Make application instance fit the entire screen\
+local termSize = {term.getSize()}\
+\
+-- Application Instance\
+local App = Application():set({\
+\009width = termSize[1],\
+\009height = termSize[2],\
+\009terminatable = true,\
+\009color = colors.black,\
+\009backgroundColor = colors.white\
+})\
+\
+App:importFromTML( \"Hyper/UI/TML/Hyper.tml\" )\
+App:addTheme( Theme.fromFile( \"Hyper\", \"Hyper/UI/Themes/Hyper.theme\" ) )\
+\
+local function getNode( id )\
+\009return App:query(id).result[1]\
+end\
+\
+-- Get nodes and organize them\
+local Topbar = {\
+\009self = getNode \"#Topbar\",\
+\
+\009menuButton = getNode \"#TopbarMenuButton\",\
+\
+\009clock = getNode \"#TopbarClock\",\
+\009searchButton = getNode \"#TopbarSearchButton\",\
+\009sidebarButton = getNode \"#TopbarSidebarButton\",\
+\
+\009dragStartedOn = false\
+}\
+\
+local AppList = {\
+\009--self = getNode \"#AppList\", Not yet implemented\
+\
+\009container = getNode \"#AppListContainer\"\
+}\
+\
+local Sidebar = {\
+\009self = getNode \"#Sidebar\",\
+\
+\009tabContainer = getNode \"#SidebarTabContainer\",\
+\
+\009Notifications = {\
+\009\009self = getNode \"#SidebarNotifications\",\
+\009\009list = getNode \"#SidebarNotificationsList\"\
+\009},\
+\
+\009isOpen = false\
+}\
+\
+local Dialog = {\
+\009self = getNode \"#Dialog\",\
+\
+\009label = getNode \"#DialogLabel\",\
+\
+\009rightButton = getNode \"#DialogButtonRight\",\
+\009leftButton = getNode \"#DialogButtonLeft\"\
+}\
+\
+-- Stupid fixes that shouldn't have to be done like this, but it's the only way.\
+function Sidebar:toggle() -- Can't be inside Sidebar because reasons\
+\009if Sidebar.isOpen then\
+\009\009Sidebar.self:animate( \"showSidebar\", \"X\", App.width + 1, 0.3, \"inCubic\" )\
+\009else\
+\009\009Sidebar.self:animate( \"hideSidebar\", \"X\", App.width - Sidebar.self.width + 1, 0.3, \"outCubic\" )\
+\009end\
+\009Sidebar.isOpen = not Sidebar.isOpen\
+end\
+\
+function Dialog:create( label, buttonRight, buttonLeft, funcRight, funcLeft )\
+\009Dialog.label:setText( label )\
+\009Dialog.rightButton:setText( buttonRight and buttonRight or \"\" )\
+\009Dialog.rightButton:off( \"trigger\" ):on( \"trigger\", function()\
+\009\009Dialog.self:animate( \"dialog\", \"Y\", App.height + 1, 0.3, \"inCubic\" )\
+\009\009if funcRight then funcRight() end\
+\009end)\
+\009Dialog.leftButton:setText( buttonLeft and buttonLeft or \"\" )\
+\009Dialog.leftButton:off( \"trigger\" ):on( \"trigger\", function()\
+\009\009Dialog.self:animate( \"dialog\", \"Y\", App.height + 1, 0.3, \"inCubic\" )\
+\009\009if funcLeft then funcLeft() end\
+\009end)\
+\
+\009Dialog.self:animate( \"dialog\", \"Y\", (App.height - Dialog.self.height) / 2, 0.3, \"outCubic\" )\
+end\
+\
+Sidebar.tabContainer:set({ -- TabbedPageContainer doesn't apply colors from theme\
+\009tabColour = colors.black,\
+\009tabBackgroundColour = colors.lightGray,\
+\009selectedTabColour = colors.white,\
+\009selectedTabBackgroundColour = colors.lightBlue\
+})\
+\
+-- Setup event handlers\
+Topbar.menuButton:on( \"trigger\", function()\
+\009if Topbar.Menu then\
+\009\009App:removeNode( Topbar.Menu )\
+\009end\
+\009Topbar.Menu = App:addNode( ContextMenu({\
+\009\009{\"button\", \" About Hyper \", function()\
+\009\009\009App:removeNode( Topbar.Menu )\
+\009\009\009Dialog.create( nil --[[ why? ]], \"Hyper\\n\".._HOST, \"OK\" )\
+\009\009end},\
+\009\009{\"rule\"},\
+\009\009{\"button\", \" Settings \", function() end},\
+\009\009{\"rule\"},\
+\009\009{\"menu\", \" Leave...   \\16 \", {\
+\009\009\009{\"button\", \" Logout \", function()\
+\009\009\009\009App:removeNode( Topbar.Menu )\
+\009\009\009\009Dialog:create( \"Log out?\", \"Yes\", \"No\", function() App:stop() end )\
+\009\009\009end},\
+\009\009\009{\"button\", \" Reboot \", function()\
+\009\009\009\009App:removeNode( Topbar.Menu )\
+\009\009\009\009Dialog:create( \"Reboot?\", \"Yes\", \"No\", os.reboot)\
+\009\009\009end},\
+\009\009\009{\"button\", \" Shutdown \", function()\
+\009\009\009\009App:removeNode( Topbar.Menu )\
+\009\009\009\009Dialog:create( \"Shut down?\", \"Yes\", \"No\", os.shutdown)\
+\009\009\009end}\
+\009\009}}\
+\009}, 2, Topbar.self.Y + 1 ))\
+end)\
+\
+Topbar.sidebarButton:on( \"trigger\", Sidebar.toggle )\
+Topbar.searchButton:on( \"trigger\", function() Topbar.self:animate( \"topbar\", \"Y\", 10, 0.3, \"outCubic\" ) end)\
+\
+Sidebar.tabContainer:selectPage( \"SidebarNotifications\" )\
+\
+-- Set some global event listeners\
+App:on( \"mouse_click\", function( _, event )\
+\009if event.button == 1 then\
+\009\009if event.Y == Topbar.self.Y then Topbar.dragStartedOn = true end\
+\009\009if event.X < Sidebar.self.X and Sidebar.isOpen and not Topbar.dragStartedOn then\
+\009\009\009Sidebar:toggle()\
+\009\009\009event.handled = true\
+\009\009end\
+\009end\
+end):on( \"mouse_drag\", function( _, event )\
+\009if event.button == 1 then\
+\009\009if Topbar.dragStartedOn then\
+\009\009\009Topbar.self.Y = event.Y\
+\009\009\009event.handled = true\
+\009\009end\
+\009end\
+end):on( \"mouse_up\", function()\
+\009Topbar.dragStartedOn = false\
+end)\
+\
+-- Start Titanium event loop\
+App:schedule( function() Topbar.clock:update() end, 0.5, true )\
+App:start()",
+  [ "Hyper/UI/Themes/Hyper.theme" ] = "<!-- Hyper Theme -->\
 \
 <!-- Application -->\
 <Container class=\"Application\">\
@@ -2771,101 +3103,259 @@ ba:schedule(function()da.clock:update()end,0.5,true)ba:start()",["Hyper/UI/Theme
 \009<color>cyan</color>\
 \009<activeColor>white</activeColor>\
 \009<activeBackgroundColor>lightBlue</activeBackgroundColor>\
-</Button>",["Hyper/Lua/pre-init.lua"]="local c,d=term.getSize()\
-term.setBackgroundColor(colors.white)term.setTextColor(colors.gray)term.clear()term.setCursorPos(2,\
-d-1)\
-write(\"Hold SHIFT for boot options\")dofile(\"Hyper/Titanium/Titanium.lua\")"}local dd=
-type(getfenv)=="function"and getfenv()or _ENV or _G;if dd.TI_VFS_RAW then
-dd=dd.TI_VFS_RAW end;local __a=dd.fs
-local a_a=setmetatable({fs=__a,os=setmetatable({},{__index=_G["os"]})},{__index=dd})local b_a=setmetatable({},{__index=a_a.fs})
-local c_a=setmetatable({},{__index=function(dba,_ca)if
-_ca=="TI_VFS_RAW"then return a_a elseif _ca=="fs"then return b_a end;return a_a[_ca]end})c_a._G=c_a;c_a._ENV=c_a
-local d_a={["Hyper/UI"]=true,Hyper=true,["Hyper/Titanium"]=true,["Hyper/UI/TML"]=true,["Hyper/Lua"]=true,["Hyper/UI/Themes"]=true}
-local _aa={["^"]="%^",["$"]="%$",["("]="%(",[")"]="%)",["%"]="%%",["*"]="[^/]*",["."]="%.",["["]="%[",["]"]="%]",["+"]="%+",["-"]="%-"}
-function c_a.load(dba,_ca,aca,bca)return load(dba,_ca or'(load)',aca,bca or c_a)end
-function c_a.loadstring(dba,_ca)return c_a.load(dba,_ca,'t',c_a)end
-function c_a.loadfile(dba,_ca)local aca=c_a;local bca=fs.open(dba,"r")if bca then local cca,dca=load(bca.readAll(),fs.getName(dba),'t',
-_ca or c_a)
-bca.close()return cca,dca end
-return nil,'File not found'end
-if type(setfenv)=="function"then setfenv(c_a.loadfile,c_a)end
-function c_a.os.run(dba,_ca,...)local aca=c_a;local bca,cca={...},dba
-setmetatable(cca,{__index=c_a})local dca,_da=loadfile(_ca,cca)
-if dca then local ada,bda=pcall(function()
-dca(table.unpack(bca))end)
-if not ada then if bda and
-bda~=""then printError(bda)end;return false end;return true end;if _da and _da~=""then printError(_da)end;return false end;local aaa={}
-function c_a.os.loadAPI(dba)local _ca,aca=c_a,fs.getName(dba)if aaa[aca]==true then
-printError(
-"API "..aca.." is already being loaded")return false end;aaa[aca]=true
-local bca=setmetatable({},{__index=c_a})local cca,dca=loadfile(dba,bca)
-if cca then local ada,bda=pcall(cca)if not ada then
-printError(bda)aaa[aca]=nil;return false end else printError(dca)aaa[aca]=
-nil;return false end;local _da={}
-for ada,bda in pairs(bca)do if ada~="_ENV"then _da[ada]=bda end end;c_a[aca],aaa[aca]=_da,nil;return true end;c_a.os.loadAPI"/rom/apis/io"
-function c_a.dofile(dba)local _ca=c_a
-local aca,bca=loadfile(dba,c_a)if aca then return aca()else error(bca,2)end end
-if type(setfenv)=="function"then setfenv(c_a.dofile,c_a)end
-function b_a.open(dba,_ca)dba=fs.combine("",dba)
-if cd[dba]then
-if
-_ca=="w"or _ca=="wb"or _ca=="a"or _ca=="ab"then return
-error("Cannot open file in mode '"..tostring(_ca)..
-"'. File is inside of Titanium VFS and is read only")end;local aca,bca=cd[dba],{}if _ca=="rb"then
-bca.read=function()if#aca==0 then return end
-local cca=aca:sub(1,1):byte()aca=aca:sub(2)return cca end end
-bca.readLine=function()if
-#aca==0 then return end;local cca,dca=aca:match"^([^\n\r]*)(.*)$"aca=dca and
-dca:gsub("^[\n\r]","")or""return cca or aca end
-bca.readAll=function()if#aca==0 then return end;local cca=aca;aca=""return cca end;bca.close=function()aca=""end;return bca else return
-__a.open(fs.combine(ad,dba),_ca)end end
-function b_a.isReadOnly(dba)dba=fs.combine("",dba)if cd[dba]then return true end;return
-__a.isReadOnly(fs.combine(ad,dba))end;function b_a.getSize(dba)
-return cd[dba]and#cd[dba]or __a.getSize(dba)end
-function b_a.list(dba)dba=fs.combine("",dba)local _ca=
-__a.isDir(dba)and __a.list(dba)or{}local function aca(bca)for i=1,#_ca
-do if _ca[i]==bca then return end end
-_ca[#_ca+1]=bca end
-if d_a[dba]then
-for bca in pairs(cd)do if
-bca:match(("^%s/"):format(dba))then
-aca(bca:match(("^%s/([^/]+)"):format(dba)))end end elseif dba==""then
-for bca in pairs(cd)do aca(bca:match"^([^/]+)")end end;return _ca end
-function b_a.find(dba)dba=fs.combine("",dba)local _ca=__a.find(dba)or{}
-dba=("^(%s)(.*)$"):format(dba:gsub(".",_aa))
-for aca in pairs(cd)do local bca,cca=aca:match(dba)
-if bca and
-(cca==""or cca:sub(1,1)=="/")then local dca
-for i=1,#_ca do if _ca[i]==bca then dca=true;break end end;if not dca then _ca[#_ca+1]=bca end end end;return _ca end
-function b_a.isDir(dba)dba=fs.combine("",dba)return d_a[dba]or
-__a.isDir(fs.combine(ad,dba))end
-function b_a.exists(dba)dba=fs.combine("",dba)
-if cd[dba]or d_a[dba]then return true end;return __a.exists(fs.combine(ad,dba))end;local baa,caa=c_a.loadfile'Hyper/Lua/pre-init.lua'
-if baa then
-baa(unpack(_d))else return
-error('Failed to run file from bundle: "'..tostring(caa)..'"')end;local daa=c_a.Titanium
-if not daa then
-return
-error"Failed to execute Titanium package. Titanium is not loaded. Please load Titanium before executing this package (or use a --titanium-init), or repackage this application using the --titanium flag."end;local _ba={}
-local function aba(dba,_ca)
-if not _ca then return
-error("Failed to load class '"..dba.."'. No source found within class assets")elseif _ba[dba]then return end;local aca=dba:gsub("%..*","")
-if not daa.getClass(aca)then
-local bca,cca=(c_a or _G).loadstring(_ca,dba)
-if not bca or cca then return
-error("Failed to load Lua chunk. File '"..dba..
-"' has a syntax error: "..tostring(cca),0)end;local dca,_da=pcall(bca)
-if not dca or _da then return
-error("Failed to execute Lua chunk. File '"..dba.."' crashed: "..
-tostring(_da),0)end;local ada=daa.getClass(aca)
-if ada then if not ada:isCompiled()then
-ada:compile()end;_ba[dba]=true else return
-error("File '"..dba..
-"' failed to create class '"..aca.."'")end else
-print("WARNING: Class "..
-aca.." failed to load because a class with the same name already exists.")end end
-daa.setClassLoader(function(dba)
-local _ca=bd[dba..".lua"]and dba..".lua"or dba..".ti"aba(_ca,bd[_ca])end)for dba,_ca in pairs(bd)do aba(dba,_ca)end
-local bba,cba=c_a.loadfile'Hyper/Lua/Hyper.lua'
-if bba then bba(unpack(_d))else return
-error('Failed to run file from bundle: "'..tostring(cba)..'"')end
+</Button>",
+}local env = type( getfenv ) == "function" and getfenv() or _ENV or _G
+if env.TI_VFS_RAW then env = env.TI_VFS_RAW end
+local fallbackFS = env.fs
+local RAW = setmetatable({
+    fs = fallbackFS,
+    os = setmetatable( {}, { __index = _G["os"] } )
+}, { __index = env })
+
+local VFS = setmetatable( {}, { __index = RAW.fs } )
+local VFS_ENV = setmetatable({},{__index = function( _, key )
+    if key == "TI_VFS_RAW" then return RAW elseif key == "fs" then return VFS end
+    return RAW[ key ]
+end})
+
+VFS_ENV._G = VFS_ENV
+VFS_ENV._ENV = VFS_ENV
+
+local VFS_DIRS = {
+  [ "Hyper/UI" ] = true,
+  Hyper = true,
+  [ "Hyper/Lua" ] = true,
+  [ "Hyper/UI/TML" ] = true,
+  [ "Hyper/Titanium" ] = true,
+  [ "Hyper/UI/Themes" ] = true,
+}
+local matches = { ["^"] = "%^", ["$"] = "%$", ["("] = "%(", [")"] = "%)", ["%"] = "%%", ["*"] = "[^/]*", ["."] = "%.", ["["] = "%[", ["]"] = "%]", ["+"] = "%+", ["-"] = "%-" }
+
+
+function VFS_ENV.load(src, name, mode, env)
+    return load( src, name or '(load)', mode, env or VFS_ENV )
+end
+
+function VFS_ENV.loadstring(src, name)
+    return VFS_ENV.load( src, name, 't', VFS_ENV )
+end
+
+function VFS_ENV.loadfile(file, env)
+    local _ENV = VFS_ENV
+    local h = fs.open( file, "r" )
+    if h then
+        local fn, e = load(h.readAll(), fs.getName(file), 't', env or VFS_ENV)
+        h.close()
+        return fn, e
+    end
+
+    return nil, 'File not found'
+end
+if type( setfenv ) == "function" then setfenv( VFS_ENV.loadfile, VFS_ENV ) end
+
+function VFS_ENV.os.run( _tEnv, _sPath, ... )
+    local _ENV = VFS_ENV
+    local tArgs, tEnv = { ... }, _tEnv
+
+    setmetatable( tEnv, { __index = VFS_ENV } )
+    local fnFile, err = loadfile( _sPath, tEnv )
+    if fnFile then
+        local ok, err = pcall( function()
+            fnFile( table.unpack( tArgs ) )
+        end )
+        if not ok then
+            if err and err ~= "" then
+                printError( err )
+            end
+            return false
+        end
+        return true
+    end
+    if err and err ~= "" then
+        printError( err )
+    end
+    return false
+end
+
+local tAPIsLoading = {}
+function VFS_ENV.os.loadAPI( _sPath )
+    local _ENV, sName = VFS_ENV, fs.getName( _sPath )
+    if tAPIsLoading[sName] == true then
+        printError( "API "..sName.." is already being loaded" )
+        return false
+    end
+    tAPIsLoading[sName] = true
+
+    local tEnv = setmetatable( {}, { __index = VFS_ENV } )
+    local fnAPI, err = loadfile( _sPath, tEnv )
+    if fnAPI then
+        local ok, err = pcall( fnAPI )
+        if not ok then
+            printError( err )
+            tAPIsLoading[sName] = nil
+            return false
+        end
+    else
+        printError( err )
+        tAPIsLoading[sName] = nil
+        return false
+    end
+
+    local tAPI = {}
+    for k,v in pairs( tEnv ) do if k ~= "_ENV" then tAPI[k] =  v end end
+
+    VFS_ENV[sName], tAPIsLoading[sName] = tAPI, nil
+    return true
+end
+
+VFS_ENV.os.loadAPI "/rom/apis/io"
+function VFS_ENV.dofile(file)
+    local _ENV = VFS_ENV
+    local fn, e = loadfile(file, VFS_ENV)
+
+    if fn then return fn()
+    else error(e, 2) end
+end
+if type( setfenv ) == "function" then setfenv( VFS_ENV.dofile, VFS_ENV ) end
+
+function VFS.open( path, mode )
+    path = fs.combine( "", path )
+    if vfsAssets[ path ] then
+        if mode == "w" or mode == "wb" or mode == "a" or mode == "ab" then
+            return error("Cannot open file in mode '"..tostring( mode ).."'. File is inside of Titanium VFS and is read only")
+        end
+
+        local content, handle = vfsAssets[ path ], {}
+        if mode == "rb" then
+            handle.read = function()
+                if #content == 0 then return end
+                local b = content:sub( 1, 1 ):byte()
+
+                content = content:sub( 2 )
+                return b
+            end
+        end
+
+        handle.readLine = function()
+            if #content == 0 then return end
+
+            local line, rest = content:match "^([^\n\r]*)(.*)$"
+
+            content = rest and rest:gsub("^[\n\r]", "") or ""
+            return line or content
+        end
+
+        handle.readAll = function()
+            if #content == 0 then return end
+
+            local c = content
+            content = ""
+
+            return c
+        end
+
+        handle.close = function() content = "" end
+
+        return handle
+    else return fallbackFS.open( fs.combine( exportDirectory, path ), mode ) end
+end
+
+function VFS.isReadOnly( path )
+    path = fs.combine( "", path )
+    if vfsAssets[ path ] then return true end
+
+    return fallbackFS.isReadOnly( fs.combine( exportDirectory, path ) )
+end
+
+function VFS.getSize( path )
+    return vfsAssets[ path ] and #vfsAssets[ path ] or fallbackFS.getSize( path )
+end
+
+function VFS.list( target )
+    target = fs.combine( "", target )
+    local list = fallbackFS.isDir( target ) and fallbackFS.list( target ) or {}
+
+    local function addResult( res )
+        for i = 1, #list do if list[ i ] == res then return end end
+        list[ #list + 1 ] = res
+    end
+
+    if VFS_DIRS[ target ] then
+        for path in pairs( vfsAssets ) do
+            if path:match( ("^%s/"):format( target ) ) then
+                addResult( path:match( ("^%s/([^/]+)"):format( target ) ) )
+            end
+        end
+    elseif target == "" then
+        for path in pairs( vfsAssets ) do addResult( path:match "^([^/]+)" ) end
+    end
+
+    return list
+end
+
+function VFS.find( target )
+    target = fs.combine( "", target )
+    local list = fallbackFS.find( target ) or {}
+
+    target = ("^(%s)(.*)$"):format( target:gsub( ".", matches ) )
+    for path in pairs( vfsAssets ) do
+        local res, tail = path:match( target )
+        if res and ( tail == "" or tail:sub( 1, 1 ) == "/" ) then
+            local isMatch
+            for i = 1, #list do if list[ i ] == res then isMatch = true; break end end
+
+            if not isMatch then list[ #list + 1 ] = res end
+        end
+    end
+
+    return list
+end
+
+function VFS.isDir( path )
+    path = fs.combine( "", path )
+    return VFS_DIRS[ path ] or fallbackFS.isDir( fs.combine( exportDirectory, path ) )
+end
+
+function VFS.exists( path )
+    path = fs.combine( "", path )
+    if vfsAssets[ path ] or VFS_DIRS[ path ] then return true end
+
+    return fallbackFS.exists( fs.combine( exportDirectory, path ) )
+end
+local fn, err = VFS_ENV.loadfile 'Hyper/Lua/pre-init.lua'if fn then fn( unpack( args ) ) else return error('Failed to run file from bundle: "'..tostring( err )..'"') end
+local ti = VFS_ENV.Titanium
+if not ti then
+    return error "Failed to execute Titanium package. Titanium is not loaded. Please load Titanium before executing this package (or use a --titanium-init), or repackage this application using the --titanium flag."
+end
+
+local loaded = {}
+local function loadClass( name, source )
+    if not source then return error( "Failed to load class '"..name.."'. No source found within class assets" )
+    elseif loaded[ name ] then return end
+
+    local className = name:gsub( "%..*", "" )
+    if not ti.getClass( className ) then
+        local output, err = ( VFS_ENV or _G ).loadstring( source, name )
+        if not output or err then return error( "Failed to load Lua chunk. File '"..name.."' has a syntax error: "..tostring( err ), 0 ) end
+
+        local ok, err = pcall( output )
+        if not ok or err then return error( "Failed to execute Lua chunk. File '"..name.."' crashed: "..tostring( err ), 0 ) end
+
+        local class = ti.getClass( className )
+        if class then
+            if not class:isCompiled() then class:compile() end
+            loaded[ name ] = true
+        else return error( "File '"..name.."' failed to create class '"..className.."'" ) end
+    else
+        print( "WARNING: Class " .. className .. " failed to load because a class with the same name already exists." )
+    end
+end
+
+ti.setClassLoader(function( c )
+    local name = classSource[ c .. ".lua" ] and c .. ".lua" or c .. ".ti"
+    loadClass( name, classSource[ name ] )
+end)
+for name, source in pairs( classSource ) do
+    loadClass( name, source )
+end
+local fn, err = VFS_ENV.loadfile 'Hyper/Lua/Hyper.lua'if fn then fn( unpack( args ) ) else return error('Failed to run file from bundle: "'..tostring( err )..'"') end
