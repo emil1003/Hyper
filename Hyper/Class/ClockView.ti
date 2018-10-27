@@ -2,7 +2,7 @@
 	A simple class that makes displaying a clock easy.
 	NOTE: Add :update() to Application:schedule(), preferably with a .5 sec delay and repeating.
 ]]
-class ClockView extends Node {
+class "ClockView" extends "Node" {
 	clockType = 1;
 
 	color = colors.lightGray;

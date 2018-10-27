@@ -1,0 +1,36 @@
+--[[
+	Class that wraps "Window", and puts a Terminal inside it.
+]]
+class "AppWindow" extends "Window"
+
+--[[
+	@constructor
+	@desc Setup Terminal view and init Window
+	@param <table - structure>*
+]]
+function AppWindow:__init__( ... )
+	self:resolve( ... )
+
+	if not self.chunk then
+		error("No function provided")
+	end
+
+	self.termSurface = Terminal():set {
+		id = "TermSurface",
+		X = 1,
+		Y = 1,
+		width = "$parent.width",
+		height = "$parent.height",
+		chunk = self.chunk
+	}
+
+	self:super( ... )
+	self.content:addNode( self.termSurface )
+end
+
+configureConstructor({
+	orderedArguments = { "X", "Y", "width", "height", "chunk" },
+	argumentTypes = {
+		chunk = "function"
+	}
+}, true)

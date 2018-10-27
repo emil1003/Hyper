@@ -110,7 +110,7 @@ Topbar.menuButton:on( "trigger", function()
 			Dialog.create( nil --[[ why? ]], "Hyper\n".._HOST, "OK" )
 		end},
 		{"rule"},
-		{"button", " Settings ", function() end},
+		{"button", " Settings ", function() App:addNode( AppWindow( 2, 3, 20, 10, function() shell.run("/rom/programs/shell") end)) end},
 		{"rule"},
 		{"menu", " Leave...   \16 ", {
 			{"button", " Logout ", function()

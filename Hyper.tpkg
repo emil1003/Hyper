@@ -8,6 +8,42 @@ if args[ 1 ] and args[ 1 ] ~= "--" then exportDirectory = args[ 1 ] or "" end
 table.remove( args, 1 )
 if args[ 1 ] == "--" then table.remove( args, 1 ) end
 local classSource = {
+  [ "AppWindow.ti" ] = "--[[\
+\009Class that wraps \"Window\", and puts a Terminal inside it.\
+]]\
+class \"AppWindow\" extends \"Window\"\
+\
+--[[\
+\009@constructor\
+\009@desc Setup Terminal view and init Window\
+\009@param <table - structure>*\
+]]\
+function AppWindow:__init__( ... )\
+\009self:resolve( ... )\
+\
+\009if not self.chunk then\
+\009\009error(\"No function provided\")\
+\009end\
+\
+\009self.termSurface = Terminal():set {\
+\009\009id = \"TermSurface\",\
+\009\009X = 1,\
+\009\009Y = 1,\
+\009\009width = \"$parent.width\",\
+\009\009height = \"$parent.height\",\
+\009\009chunk = self.chunk\
+\009}\
+\
+\009self:super( ... )\
+\009self.content:addNode( self.termSurface )\
+end\
+\
+configureConstructor({\
+\009orderedArguments = { \"X\", \"Y\", \"width\", \"height\", \"chunk\" },\
+\009argumentTypes = {\
+\009\009chunk = \"function\"\
+\009}\
+}, true)",
   [ "ListView.ti" ] = "--[[\
 \009Displays nodes as a vertically scrolling list\
 ]]\
@@ -3001,7 +3037,7 @@ Topbar.menuButton:on( \"trigger\", function()\
 \009\009\009Dialog.create( nil --[[ why? ]], \"Hyper\\n\".._HOST, \"OK\" )\
 \009\009end},\
 \009\009{\"rule\"},\
-\009\009{\"button\", \" Settings \", function() end},\
+\009\009{\"button\", \" Settings \", function() App:addNode( AppWindow( 2, 3, 20, 10, function() shell.run(\"/rom/programs/shell\") end)) end},\
 \009\009{\"rule\"},\
 \009\009{\"menu\", \" Leave...   \\16 \", {\
 \009\009\009{\"button\", \" Logout \", function()\

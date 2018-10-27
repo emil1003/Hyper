@@ -2,7 +2,7 @@
 	Displays nodes as a vertically scrolling list
 ]]
 
-class ListView extends ScrollContainer {
+class "ListView" extends "ScrollContainer" {
 	totalNodeHeight = 0;
 }
 
