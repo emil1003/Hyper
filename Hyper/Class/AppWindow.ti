@@ -25,6 +25,10 @@ function AppWindow:__init__( ... )
 
 	self:super( ... )
 	self.content:addNode( self.termSurface )
+
+	self:watchProperty( "width", function()
+		self:onResize()
+	end)
 end
 
 --[[
@@ -35,6 +39,10 @@ function AppWindow:__postInit__()
 	self.super:__postInit__()
 
 	self.termSurface:setChunk( self.chunk )
+end
+
+function AppWindow:onResize()
+	self.termSurface:resume( GenericEvent "term_resize" )
 end
 
 configureConstructor({
