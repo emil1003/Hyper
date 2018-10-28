@@ -30,12 +30,21 @@ function AppWindow:__init__( ... )\
 \009\009X = 1,\
 \009\009Y = 1,\
 \009\009width = \"$parent.width\",\
-\009\009height = \"$parent.height\",\
-\009\009chunk = self.chunk\
+\009\009height = \"$parent.height\"\
 \009}\
 \
 \009self:super( ... )\
 \009self.content:addNode( self.termSurface )\
+end\
+\
+--[[\
+\009@instance\
+\009@desc After init, pass the chunk to termSurface\
+]]\
+function AppWindow:__postInit__()\
+\009self.super:__postInit__()\
+\
+\009self.termSurface:setChunk( self.chunk )\
 end\
 \
 configureConstructor({\
