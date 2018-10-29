@@ -107,7 +107,7 @@ Topbar.menuButton:on( "trigger", function()
 	Topbar.Menu = App:addNode( ContextMenu({
 		{"button", " About Hyper ", function()
 			App:removeNode( Topbar.Menu )
-			Dialog.create( nil --[[ why? ]], "Hyper\n".._HOST, "OK" )
+			Dialog:create( "Hyper\n".._HOST, "OK" )
 		end},
 		{"rule"},
 		{"button", " Settings ", function() App:addNode( AppWindow( 2, 3, 20, 10, function() shell.run("/rom/programs/shell") end)) end},
