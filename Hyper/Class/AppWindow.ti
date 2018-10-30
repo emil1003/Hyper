@@ -11,10 +11,6 @@ class "AppWindow" extends "Window"
 function AppWindow:__init__( ... )
 	self:resolve( ... )
 
-	if not self.chunk then
-		error("No function provided")
-	end
-
 	self.termSurface = Terminal():set {
 		id = "TermSurface",
 		X = 1,
@@ -38,16 +34,46 @@ end
 function AppWindow:__postInit__()
 	self.super:__postInit__()
 
+	if self.chunk then
+		self.termSurface:setChunk( self.chunk )
+	end
+end
+
+--[[
+	@setter
+	@desc Load a chunk into termSurface after init
+	@param <string - path>
+	@param <function - chunk>
+]]
+function AppWindow:setChunk( val )
+	if type( val ) == "string" then
+		if fs.exists( val ) then
+			local state, res = pcall( loadfile, val )
+			if state then
+				self.chunk = res
+			else
+				error("Failed to load "..val..": "..res)
+			end
+		else
+			-- Loading chunks from strings isn't supported
+			error("File not found: "..val)
+		end
+	elseif type( val ) == "function" then
+		self.chunk = val
+	else
+		error("Expected string or function, got "..type( val ))
+	end
 	self.termSurface:setChunk( self.chunk )
 end
 
+--[[
+	@instance
+	@desc When resized, termSurface is resumed with a "term_resize" event
+]]
 function AppWindow:onResize()
 	self.termSurface:resume( GenericEvent "term_resize" )
 end
 
-configureConstructor({
-	orderedArguments = { "X", "Y", "width", "height", "chunk" },
-	argumentTypes = {
-		chunk = "function"
-	}
-}, true)
+configureConstructor {
+	orderedArguments = { "X", "Y", "width", "height" }
+}

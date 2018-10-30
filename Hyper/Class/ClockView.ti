@@ -48,5 +48,7 @@ function ClockView:draw( force )
 end
 
 configureConstructor {
-	argumentTypes = { clockType = "number", color = "colour", backgroundColor = "colour" }
+	argumentTypes = { clockType = "number", color = "colour", backgroundColor = "colour" },
+	colour = "color",
+	backgroundColour = "backgroundColor"
 }

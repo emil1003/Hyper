@@ -21,10 +21,6 @@ class \"AppWindow\" extends \"Window\"\
 function AppWindow:__init__( ... )\
 \009self:resolve( ... )\
 \
-\009if not self.chunk then\
-\009\009error(\"No function provided\")\
-\009end\
-\
 \009self.termSurface = Terminal():set {\
 \009\009id = \"TermSurface\",\
 \009\009X = 1,\
@@ -48,19 +44,49 @@ end\
 function AppWindow:__postInit__()\
 \009self.super:__postInit__()\
 \
+\009if self.chunk then\
+\009\009self.termSurface:setChunk( self.chunk )\
+\009end\
+end\
+\
+--[[\
+\009@setter\
+\009@desc Load a chunk into termSurface after init\
+\009@param <string - path>\
+\009@param <function - chunk>\
+]]\
+function AppWindow:setChunk( val )\
+\009if type( val ) == \"string\" then\
+\009\009if fs.exists( val ) then\
+\009\009\009local state, res = pcall( loadfile, val )\
+\009\009\009if state then\
+\009\009\009\009self.chunk = res\
+\009\009\009else\
+\009\009\009\009error(\"Failed to load \"..val..\": \"..res)\
+\009\009\009end\
+\009\009else\
+\009\009\009-- Loading chunks from strings isn't supported\
+\009\009\009error(\"File not found: \"..val)\
+\009\009end\
+\009elseif type( val ) == \"function\" then\
+\009\009self.chunk = val\
+\009else\
+\009\009error(\"Expected string or function, got \"..type( val ))\
+\009end\
 \009self.termSurface:setChunk( self.chunk )\
 end\
 \
+--[[\
+\009@instance\
+\009@desc When resized, termSurface is resumed with a \"term_resize\" event\
+]]\
 function AppWindow:onResize()\
 \009self.termSurface:resume( GenericEvent \"term_resize\" )\
 end\
 \
-configureConstructor({\
-\009orderedArguments = { \"X\", \"Y\", \"width\", \"height\", \"chunk\" },\
-\009argumentTypes = {\
-\009\009chunk = \"function\"\
-\009}\
-}, true)",
+configureConstructor {\
+\009orderedArguments = { \"X\", \"Y\", \"width\", \"height\" }\
+}",
   [ "ListView.ti" ] = "--[[\
 \009Displays nodes as a vertically scrolling list\
 ]]\
@@ -164,7 +190,9 @@ function ClockView:draw( force )\
 end\
 \
 configureConstructor {\
-\009argumentTypes = { clockType = \"number\", color = \"colour\", backgroundColor = \"colour\" }\
+\009argumentTypes = { clockType = \"number\", color = \"colour\", backgroundColor = \"colour\" },\
+\009colour = \"color\",\
+\009backgroundColour = \"backgroundColor\"\
 }",
 }
 local vfsAssets = {
@@ -218,12 +246,20 @@ local vfsAssets = {
 \
 local X, Y = term.getSize()\
 \
+local function writeCentered(text, y)\
+    x = math.ceil(math.ceil((X / 2) - (#text / 2)), 0)+1\
+    term.setCursorPos(x, y)\
+    write(text)\
+end\
+\
 term.setBackgroundColor(colors.white)\
-term.setTextColor(colors.gray)\
 term.clear()\
 \
-term.setCursorPos(2, Y - 1)\
-write(\"Hold SHIFT for boot options\")\
+term.setTextColor(colors.gray)\
+writeCentered(\"Hyper\", math.ceil(Y / 2))\
+\
+term.setTextColor(colors.lightGray)\
+writeCentered(\"Hold SHIFT for boot options\", Y - 1)\
 \
 -- Load self contained Titanium package\
 dofile(\"Hyper/Titanium/Titanium.lua\")",
@@ -3036,6 +3072,17 @@ function Dialog:create( label, buttonRight, buttonLeft, funcRight, funcLeft )\
 \009Dialog.self:animate( \"dialog\", \"Y\", (App.height - Dialog.self.height) / 2, 0.3, \"outCubic\" )\
 end\
 \
+local function loadShellWindow()\
+\009local a = AppWindow():set {\
+\009\009X = 2,\
+\009\009Y = 3,\
+\009\009width = 20,\
+\009\009height = 10\
+\009}\
+\009a:setChunk( function() shell.run(\"/rom/programs/shell\") end )\
+\009App:addNode( a )\
+end\
+\
 Sidebar.tabContainer:set({ -- TabbedPageContainer doesn't apply colors from theme\
 \009tabColour = colors.black,\
 \009tabBackgroundColour = colors.lightGray,\
@@ -3054,7 +3101,10 @@ Topbar.menuButton:on( \"trigger\", function()\
 \009\009\009Dialog:create( \"Hyper\\n\".._HOST, \"OK\" )\
 \009\009end},\
 \009\009{\"rule\"},\
-\009\009{\"button\", \" Settings \", function() App:addNode( AppWindow( 2, 3, 20, 10, function() shell.run(\"/rom/programs/shell\") end)) end},\
+\009\009{\"button\", \" Settings \", function()\
+\009\009\009App:removeNode( Topbar.Menu )\
+\009\009\009loadShellWindow()\
+\009\009end},\
 \009\009{\"rule\"},\
 \009\009{\"menu\", \" Leave...   \\16 \", {\
 \009\009\009{\"button\", \" Logout \", function()\

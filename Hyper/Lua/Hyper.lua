@@ -92,6 +92,17 @@ function Dialog:create( label, buttonRight, buttonLeft, funcRight, funcLeft )
 	Dialog.self:animate( "dialog", "Y", (App.height - Dialog.self.height) / 2, 0.3, "outCubic" )
 end
 
+local function loadShellWindow()
+	local a = AppWindow():set {
+		X = 2,
+		Y = 3,
+		width = 20,
+		height = 10
+	}
+	a:setChunk( function() shell.run("/rom/programs/shell") end )
+	App:addNode( a )
+end
+
 Sidebar.tabContainer:set({ -- TabbedPageContainer doesn't apply colors from theme
 	tabColour = colors.black,
 	tabBackgroundColour = colors.lightGray,
@@ -110,7 +121,10 @@ Topbar.menuButton:on( "trigger", function()
 			Dialog:create( "Hyper\n".._HOST, "OK" )
 		end},
 		{"rule"},
-		{"button", " Settings ", function() App:addNode( AppWindow( 2, 3, 20, 10, function() shell.run("/rom/programs/shell") end)) end},
+		{"button", " Settings ", function()
+			App:removeNode( Topbar.Menu )
+			loadShellWindow()
+		end},
 		{"rule"},
 		{"menu", " Leave...   \16 ", {
 			{"button", " Logout ", function()
