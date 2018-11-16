@@ -166,6 +166,12 @@ end):on( "mouse_drag", function( _, event )
 	end
 end):on( "mouse_up", function()
 	Topbar.dragStartedOn = false
+end):on( "term_resize", function()
+	termSize = {term.getSize()}
+	App:set {
+		width = termSize[1],
+		height = termSize[2],
+	}
 end)
 
 -- Start Titanium event loop
