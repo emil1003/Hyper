@@ -14,11 +14,11 @@ class "ClockView" extends "Node" {
 	@desc Init instance and watch the property 'text'
 	@param <table - structure>*
 ]]
-function ClockView:__init__( ... )
-	self:resolve( ... )
+function ClockView:__init__(...)
+	self:resolve(...)
 	self:super()
 
-	self:register( "color", "backgroundColor" )
+	self:register("color", "backgroundColor")
 
     self:update()
 end
@@ -28,7 +28,7 @@ end
 	@desc Updates the clock text (clockType 1 = 24 hr clock)
 ]]
 function ClockView:update()
-	local newTime = textutils.formatTime( os.time(), self.clockType == 1 and true or false )
+	local newTime = textutils.formatTime(os.time(), self.clockType == 1 and true or false)
 	if self.text ~= newTime then
 		self.text = newTime
 		self.width = #newTime
@@ -41,14 +41,14 @@ end
 	@desc Draws the node
 	@param <boolean - force>*
 ]]
-function ClockView:draw( force )
+function ClockView:draw(force)
 	if self.changed or force then
-		self.canvas:drawTextLine( 1, 1, self.text, self.color, self.backgroundColor )
+		self.canvas:drawTextLine(1, 1, self.text, self.color, self.backgroundColor)
 	end
 end
 
 configureConstructor {
-	argumentTypes = { clockType = "number", color = "colour", backgroundColor = "colour" },
+	argumentTypes = {clockType = "number", color = "colour", backgroundColor = "colour"},
 	colour = "color",
 	backgroundColour = "backgroundColor"
 }

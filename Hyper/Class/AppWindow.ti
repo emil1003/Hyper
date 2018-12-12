@@ -8,21 +8,21 @@ class "AppWindow" extends "Window"
 	@desc Setup Terminal view and init Window
 	@param <table - structure>*
 ]]
-function AppWindow:__init__( ... )
-	self:resolve( ... )
+function AppWindow:__init__(...)
+	self:resolve(...)
 
-	self.termSurface = Terminal():set {
+	self.termSurface = Terminal():set({
 		id = "TermSurface",
 		X = 1,
 		Y = 1,
 		width = "$parent.width",
 		height = "$parent.height"
-	}
+	})
 
-	self:super( ... )
-	self.content:addNode( self.termSurface )
+	self:super(...)
+	self.content:addNode(self.termSurface)
 
-	self:watchProperty( "width", function()
+	self:watchProperty("width", function()
 		self:onResize()
 	end)
 end
@@ -35,7 +35,7 @@ function AppWindow:__postInit__()
 	self.super:__postInit__()
 
 	if self.chunk then
-		self.termSurface:setChunk( self.chunk )
+		self.termSurface:setChunk(self.chunk)
 	end
 end
 
@@ -45,10 +45,10 @@ end
 	@param <string - path>
 	@param <function - chunk>
 ]]
-function AppWindow:setChunk( val )
-	if type( val ) == "string" then
-		if fs.exists( val ) then
-			local state, res = pcall( loadfile, val )
+function AppWindow:setChunk(val)
+	if type(val) == "string" then
+		if fs.exists(val) then
+			local state, res = pcall(loadfile, val)
 			if state then
 				self.chunk = res
 			else
@@ -58,12 +58,12 @@ function AppWindow:setChunk( val )
 			-- Loading chunks from strings isn't supported
 			error("File not found: "..val)
 		end
-	elseif type( val ) == "function" then
+	elseif type(val) == "function" then
 		self.chunk = val
 	else
-		error("Expected string or function, got "..type( val ))
+		error("Expected string or function, got "..type(val))
 	end
-	self.termSurface:setChunk( self.chunk )
+	self.termSurface:setChunk(self.chunk)
 end
 
 --[[
@@ -71,9 +71,9 @@ end
 	@desc When resized, termSurface is resumed with a "term_resize" event
 ]]
 function AppWindow:onResize()
-	self.termSurface:resume( GenericEvent "term_resize" )
+	self.termSurface:resume(GenericEvent("term_resize"))
 end
 
 configureConstructor {
-	orderedArguments = { "X", "Y", "width", "height" }
+	orderedArguments = {"X", "Y", "width", "height"}
 }

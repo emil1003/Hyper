@@ -11,8 +11,8 @@ class "ListView" extends "ScrollContainer" {
 	@desc Resolves constructor arguments and invokes super.
 	@param <table - structure>*
 ]]
-function ListView:__init__( ... )
-	self:super( ... )
+function ListView:__init__(...)
+	self:super(...)
 
 	--self.xScrollAllowed = false
 end
@@ -22,16 +22,16 @@ end
 	@desc Inserts a node at the bottom of the list.
 	@param <Node - node>
 ]]
-function ListView:addNode( node )
-	if not Titanium.typeOf( node, "Node", true ) then
-		return error( "Cannot add '"..tostring( node ).."' as Node on '"..tostring( self ).."'" )
+function ListView:addNode(node)
+	if not Titanium.typeOf(node, "Node", true) then
+		return error("Cannot add '"..tostring(node).."' as Node on '"..tostring(self).."'")
 	end
 
 	if self.totalNodeHeight > 0 then
 		node.Y = self.totalNodeHeight
 	end
 	self.totalNodeHeight = self.totalNodeHeight + node.height
-	self.super:addNode( node )
+	self.super:addNode(node)
 	--self.width = self.width < node.width and node.width or self.width
 	self.changed = true
 end
@@ -46,7 +46,7 @@ end
 	@desc Draw the node.
 	@param <boolean - force>*
 ]]
-function ListView:draw( force )
+function ListView:draw(force)
 	if self.changed or force then
 		self.super:draw()
 	end
