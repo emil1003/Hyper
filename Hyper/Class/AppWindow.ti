@@ -1,7 +1,9 @@
 --[[
 	Class that wraps "Window", and puts a Terminal inside it.
 ]]
-class "AppWindow" extends "Window"
+class "AppWindow" extends "Window" {
+	isCSD = false;
+}
 
 --[[
 	@constructor
@@ -21,6 +23,15 @@ function AppWindow:__init__(...)
 
 	self:super(...)
 	self.content:addNode(self.termSurface)
+
+	self:queryRaw("#titlebar > #close"):off("trigger")
+
+	self:queryRaw("#titlebar > #close"):on("trigger", function()
+		self.termSurface:resume(GenericEvent("terminate"))
+		self:remove()
+	end)
+
+	self.titleBar = not isCSD
 
 	self:watchProperty("width", function()
 		self:onResize()
@@ -64,6 +75,19 @@ function AppWindow:setChunk(val)
 		error("Expected string or function, got "..type(val))
 	end
 	self.termSurface:setChunk(self.chunk)
+end
+
+--[[
+	@setter
+	@desc Sets if program provides decorations
+	@param <boolean - isCSD>
+]]
+function AppWindow:setCSD(doCSD)
+	self.isCSD = doCSD
+	self.titleBar = not isCSD
+	-- May not be useful here, since parent hasn't had a chance to redraw
+	self:onResize()
+	self.changed = true
 end
 
 --[[
