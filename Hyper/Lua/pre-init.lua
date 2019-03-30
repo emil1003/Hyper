@@ -17,7 +17,14 @@ term.setTextColor(colors.gray)
 writeCentered("Hyper", math.ceil(Y / 2))
 
 term.setTextColor(colors.lightGray)
-writeCentered("Hold SHIFT for boot options", Y - 1)
+
+--Check for settings
+if fs.exists("/.Hyper") then
+	writeCentered("Hold SHIFT for boot options", Y - 1)
+else
+	--Most likely first boot, display friendly message
+	writeCentered("Getting ready...", Y - 1)
+end
 
 -- Load self contained Titanium package
 dofile("Hyper/Titanium/Titanium.lua")
