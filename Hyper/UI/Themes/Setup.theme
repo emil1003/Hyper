@@ -1,0 +1,7 @@
+<Container class="Application">
+	<backgroundColor>cyan</backgroundColor>
+</Container>
+
+<AppWindow>
+	<backgroundColor>white</backgroundColor>
+</AppWindow>
