@@ -3,9 +3,6 @@
 	(c) 2019 Emil Inc.
 ]]
 
---TODO: Create setup application
---For now, resume launching desktop
-
 local termSize = {term.getSize()}
 
 -- Application Instance
@@ -21,11 +18,16 @@ local function getNode(id)
 	return App:query(id).result[1]
 end
 
+--Import DOM
 App:importFromTML("Hyper/UI/TML/Setup.tml")
+
+--Inherit master theme
 App:addTheme(Theme.fromFile("Hyper", "Hyper/UI/Themes/Hyper.theme"))
+
+--Load own theme
 App:addTheme(Theme.fromFile("Setup", "Hyper/UI/Themes/Setup.theme"))
 
-App:query("#SetupWindow"):on("close", function() App:stop() end)
+getNode("#SetupWindow"):on("close", function() App:stop() end)
 
 App:start()
 

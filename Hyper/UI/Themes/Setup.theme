@@ -1,3 +1,6 @@
+<!-- Setup theme, only for theme overrides; should inherit base theme -->
+
+<!-- Friendly background color-->
 <Container class="Application">
 	<backgroundColor>cyan</backgroundColor>
 </Container>

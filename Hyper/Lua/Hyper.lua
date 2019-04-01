@@ -18,7 +18,10 @@ local App = Application():set({
 	backgroundColor = colors.white
 })
 
+--Import DOM
 App:importFromTML("Hyper/UI/TML/Hyper.tml")
+
+--Load base theme
 App:addTheme(Theme.fromFile("Hyper", "Hyper/UI/Themes/Hyper.theme"))
 
 local function getNode(id)

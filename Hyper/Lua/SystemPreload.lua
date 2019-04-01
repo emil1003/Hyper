@@ -10,4 +10,9 @@ if not fs.exists("/.Hyper") then
 end
 
 -- All set, continue loading Hyper
+--[[
+	WARNING: Loading Hyper actually takes a few seconds
+	Make sure the user don't percieve their
+	computer as frozen during loading
+]]
 dofile("Hyper/Lua/Hyper.lua")
