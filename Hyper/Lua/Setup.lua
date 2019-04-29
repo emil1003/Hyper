@@ -30,8 +30,3 @@ App:addTheme(Theme.fromFile("Setup", "Hyper/UI/Themes/Setup.theme"))
 getNode("#SetupWindow"):on("close", function() App:stop() end)
 
 App:start()
-
-
-
-
-
