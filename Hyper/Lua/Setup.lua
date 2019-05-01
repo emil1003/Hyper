@@ -27,6 +27,11 @@ App:addTheme(Theme.fromFile("Hyper", "Hyper/UI/Themes/Hyper.theme"))
 --Load own theme
 App:addTheme(Theme.fromFile("Setup", "Hyper/UI/Themes/Setup.theme"))
 
+local PageContainer = getNode("#PageContainer")
+PageContainer:selectPage("Page1")
+
+getNode("#Button"):on("trigger", function() PageContainer:selectPage("Page2") end)
+
 getNode("#SetupWindow"):on("close", function() App:stop() end)
 
 App:start()

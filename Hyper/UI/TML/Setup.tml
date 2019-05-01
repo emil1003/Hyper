@@ -1,5 +1,13 @@
 <Container X=1 Y=1 width="$application.width" height="$application.height" id="Application" class="Application">
 	<AppWindow X="$application.width / 6" Y=3 width="$application.width / 6 * 4" height="$application.height - 4" id="SetupWindow" class="SetupWindow" resizeable="false">
-		<Button X="$parent.width - self.width - 1" Y="$parent.height - 1" width="$#self.text" text="Next >" />
+		<PageContainer X=1 Y=1 width="$parent.width" height="$parent.height" id="PageContainer" >
+			<Page id="Page1" >
+				<Label X=2 Y=2 text="Page1" />
+				<Button X="$parent.width - self.width - 1" Y="$parent.height - 1" width="$#self.text" text="Next >" id="Button" />
+			</Page>
+			<Page id="Page2" >
+				<Label X=2 Y=2 text="Page2" />
+			</Page>
+		</PageContainer>
 	</AppWindow>
 </Container>
