@@ -2,6 +2,9 @@
 	Class that wraps "Window", and puts a Terminal inside it.
 ]]
 class "AppWindow" extends "Window" {
+	minimizable = true;
+	minimizeButtonColor = colors.yellow;
+
 	isCSD = false;
 }
 
@@ -30,6 +33,18 @@ function AppWindow:__init__(...)
 		self.termSurface:resume(GenericEvent("terminate"))
 		self:remove()
 	end)
+
+	-- Init minimize button
+	local a = self.titleBarContent:addNode(Button(""):set("X", "$parent.width - 1"))
+	a:set({
+		backgroundColour = "$parent.parent.closeButtonBackgroundColour",
+        colour = "$parent.parent.minimizeButtonColor",
+        text = string.char(7),
+        visible = "$parent.parent.minimizable",
+        enabled = "$self.visible",
+        id = "minimize",
+        width = 1
+	})
 
 	self.titleBar = not isCSD
 
@@ -99,5 +114,9 @@ function AppWindow:onResize()
 end
 
 configureConstructor {
-	orderedArguments = {"X", "Y", "width", "height"}
+	orderedArguments = {"X", "Y", "width", "height"},
+	argumentTypes = {
+		minimizable = "boolean",
+		minimizeButtonColor = "colour"
+	}
 }
