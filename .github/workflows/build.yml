@@ -21,3 +21,10 @@ jobs:
 
     - name: Run build.lua
       run: lua build.lua
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1.0.0
+      if: success()
+      with:
+        name: Hyper.tpkg
+        path: /home/runner/work/Hyper/Hyper/Hyper.tpkg
