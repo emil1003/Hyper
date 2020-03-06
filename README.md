@@ -1,3 +1,4 @@
+![Build](https://github.com/emil1003/Hyper/workflows/Build/badge.svg)
 # Hyper
 The powerful ComputerCraft OS.
 This is a remake of the original EmilOS (based on now deprecated EmilOS-2 alphas), using Titanium.
